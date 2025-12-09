@@ -1,32 +1,38 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 
-// 加载环境变量
-dotenv.config();
+// 缓存数据库连接，防止 Netlify 函数重复连接导致崩溃
+let cachedConn = null;
 
-// 数据库连接函数
 const connectDB = async () => {
+  if (cachedConn) {
+    console.log('✅ 使用现有的数据库连接');
+    return cachedConn;
+  }
+
   try {
-    // 1. 定义数据库地址
-    // 优先读取环境变量 MONGO_URI 或 MONGODB_URI，如果没有（比如在本地运行），就用云数据库地址
-    // ⚠️ 注意：请将 '你的密码' 替换为你设置的真实密码！
-    const dbUrl = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb+srv://2324090116:20050301@cluster0.7onkt8a.mongodb.net/?appName=Cluster0';
+    // 读取环境变量
+    const dbUrl = process.env.MONGO_URI;
     
-    // 2. 连接数据库
+    if (!dbUrl) {
+      throw new Error('未找到 MONGO_URI 环境变量');
+    }
+
+    console.log('正在建立新的数据库连接...');
+    // 连接配置，增加超时设置
     const conn = await mongoose.connect(dbUrl, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000 // 5秒连不上就报错，别卡死
     });
-    
-    console.log(`MongoDB 数据库连接成功: ${conn.connection.host}`);
+
+    cachedConn = conn;
+    console.log(`✅ MongoDB 连接成功: ${conn.connection.host}`);
     return conn;
   } catch (error) {
-    console.error(`MongoDB 连接失败: ${error.message}`);
-    console.log('数据库连接失败，但应用将继续运行以提供错误信息');
-    // 不抛出错误，允许应用继续运行
-    return null;
+    console.error(`❌ MongoDB 连接失败: ${error.message}`);
+    // 这里抛出错误，让后端知道连不上，而不是假装成功
+    throw error;
   }
 };
 
-// 导出连接函数
 module.exports = connectDB;
