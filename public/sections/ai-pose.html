@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 姿态涂鸦 - 广东工程职业技术学院</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: 'Segoe UI', sans-serif; }
+        
+        /* 绘图画布 */
+        #output_canvas {
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            /* 让绘制的角色也镜像翻转，与你的动作方向一致 */
+            transform: scaleX(-1);
+        }
+
+        /* 摄像头预览 (画中画) */
+        #video-container {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+            background: #000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        
+        #input_video {
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1); /* 镜像翻转 */
+            object-fit: cover;
+            opacity: 0.6;
+        }
+
+        /* UI 控制面板 */
+        .controls {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 200px;
+        }
+
+        .controls h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .char-btn {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .char-btn:hover, .char-btn.active {
+            background: var(--primary, #0066cc);
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .char-btn i { width: 20px; text-align: center; }
+
+        /* 返回按钮 */
+        .back-home-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 100;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-home-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* 加载提示 */
+        #loading {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 50;
+        }
+        .spinner {
+            font-size: 40px;
+            margin-bottom: 15px;
+            animation: spin 1s linear infinite;
+            display: block;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <a href="../index.html" class="back-home-btn">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+
+    <div id="loading">
+        <i class="fas fa-circle-notch spinner"></i>
+        <div>正在加载 AI 姿态模型...<br>请允许摄像头权限并站在摄像头前</div>
+    </div>
+
+    <div id="video-container">
+        <video id="input_video"></video>
+    </div>
+
+    <div class="controls">
+        <h3><i class="fas fa-user-astronaut"></i> 选择角色形象</h3>
+        <button class="char-btn active" onclick="setMode('stickman')">
+            <i class="fas fa-walking"></i> 经典火柴人
+        </button>
+        <button class="char-btn" onclick="setMode('neon')">
+            <i class="fas fa-robot"></i> 霓虹机甲
+        </button>
+        <button class="char-btn" onclick="setMode('jelly')">
+            <i class="fas fa-ghost"></i> Q弹果冻
+        </button>
+    </div>
+
+    <canvas id="output_canvas"></canvas>
+
+    <script>
+        const videoElement = document.getElementById('input_video');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const loadingScreen = document.getElementById('loading');
+        
+        let currentMode = 'stickman'; // 当前模式：stickman, neon, jelly
+        let canvasWidth, canvasHeight;
+
+        // 设置画布尺寸
+        function resizeCanvas() {
+            canvasElement.width = window.innerWidth;
+            canvasElement.height = window.innerHeight;
+            canvasWidth = canvasElement.width;
+            canvasHeight = canvasElement.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 切换模式函数
+        window.setMode = function(mode) {
+            currentMode = mode;
+            // 更新按钮状态
+            document.querySelectorAll('.char-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // --- 核心绘制逻辑 ---
+        
+        // 1. 绘制经典火柴人
+        function drawStickman(landmarks) {
+            // 设置样式
+            canvasCtx.strokeStyle = 'white';
+            canvasCtx.lineWidth = 8;
+            canvasCtx.lineCap = 'round';
+            canvasCtx.lineJoin = 'round';
+
+            // 绘制骨骼连线
+            drawConnectors(canvasCtx, landmarks, POSE_CONNECTIONS, {color: '#ffffff', lineWidth: 8});
+            
+            // 绘制头部 (鼻子点作为圆心)
+            const nose = landmarks[0];
+            const leftEar = landmarks[7];
+            const rightEar = landmarks[8];
+            // 估算头部半径
+            const headRadius = Math.abs(leftEar.x - rightEar.x) * canvasWidth * 2 || 30;
+            
+            canvasCtx.beginPath();
+            canvasCtx.arc(nose.x * canvasWidth, nose.y * canvasHeight, headRadius, 0, 2 * Math.PI);
+            canvasCtx.fillStyle = 'white';
+            canvasCtx.fill();
+            
+            // 绘制简单的笑脸
+            canvasCtx.fillStyle = 'black';
+            canvasCtx.beginPath();
+            // 左眼
+            canvasCtx.arc(nose.x * canvasWidth - headRadius*0.3, nose.y * canvasHeight - headRadius*0.1, 3, 0, 2*Math.PI);
+            // 右眼
+            canvasCtx.arc(nose.x * canvasWidth + headRadius*0.3, nose.y * canvasHeight - headRadius*0.1, 3, 0, 2*Math.PI);
+            canvasCtx.fill();
+            // 嘴巴
+            canvasCtx.beginPath();
+            canvasCtx.arc(nose.x * canvasWidth, nose.y * canvasHeight + headRadius*0.1, headRadius*0.5, 0, Math.PI);
+            canvasCtx.stroke();
+        }
+
+        // 2. 绘制霓虹机甲
+        function drawNeon(landmarks) {
+            // 背景微暗，突出霓虹
+            canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            canvasCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            // 绘制发光连线
+            canvasCtx.shadowBlur = 20;
+            canvasCtx.shadowColor = '#00ffff';
+            
+            // 躯干：青色
+            drawConnectors(canvasCtx, landmarks, [[11,12], [11,23], [12,24], [23,24]], {color: '#00ffff', lineWidth: 6});
+            
+            // 手臂：紫色
+            canvasCtx.shadowColor = '#ff00ff';
+            drawConnectors(canvasCtx, landmarks, [[11,13],[13,15],[12,14],[14,16]], {color: '#ff00ff', lineWidth: 6});
+            
+            // 腿部：黄色
+            canvasCtx.shadowColor = '#ffff00';
+            drawConnectors(canvasCtx, landmarks, [[23,25],[25,27],[24,26],[26,28]], {color: '#ffff00', lineWidth: 6});
+
+            // 绘制关节节点 (科技风方块)
+            canvasCtx.shadowBlur = 0;
+            canvasCtx.fillStyle = 'white';
+            for (let i = 11; i < 33; i++) { // 只画身体关键点，忽略脸部细节
+                if(i > 22 && i < 25) continue; // 跳过一些点
+                const p = landmarks[i];
+                const size = 10;
+                canvasCtx.fillRect(p.x * canvasWidth - size/2, p.y * canvasHeight - size/2, size, size);
+            }
+            
+            // 机甲面具 (用简单的多边形模拟)
+            const nose = landmarks[0];
+            const eyeL = landmarks[2];
+            const eyeR = landmarks[5];
+            
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(nose.x * canvasWidth, nose.y * canvasHeight + 20);
+            canvasCtx.lineTo(eyeL.x * canvasWidth - 10, eyeL.y * canvasHeight - 20);
+            canvasCtx.lineTo(eyeR.x * canvasWidth + 10, eyeR.y * canvasHeight - 20);
+            canvasCtx.closePath();
+            canvasCtx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+            canvasCtx.strokeStyle = '#00ffff';
+            canvasCtx.lineWidth = 2;
+            canvasCtx.fill();
+            canvasCtx.stroke();
+        }
+
+        // 3. 绘制Q弹果冻 (Blob)
+        function drawJelly(landmarks) {
+            canvasCtx.lineJoin = 'round';
+            canvasCtx.lineCap = 'round';
+            
+            // 绘制粗线条作为肢体
+            const limbColor = '#ff6b6b';
+            const jointColor = '#ffe66d';
+            
+            // 定义要绘制的身体部分链条
+            const chains = [
+                [11, 13, 15], // 左臂
+                [12, 14, 16], // 右臂
+                [11, 12, 24, 23], // 躯干框
+                [23, 25, 27], // 左腿
+                [24, 26, 28]  // 右腿
+            ];
+
+            // 绘制果冻肢体 (贝塞尔曲线风格，虽然这里简化为粗线)
+            canvasCtx.strokeStyle = limbColor;
+            canvasCtx.lineWidth = 25; // 很粗的线
+            
+            for (let chain of chains) {
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(landmarks[chain[0]].x * canvasWidth, landmarks[chain[0]].y * canvasHeight);
+                for (let i = 1; i < chain.length; i++) {
+                    // 使用二次贝塞尔曲线让关节处更圆润 (简单模拟：直接画线，因为lineWidth够粗)
+                    const p = landmarks[chain[i]];
+                    canvasCtx.lineTo(p.x * canvasWidth, p.y * canvasHeight);
+                }
+                if(chain.length === 4) canvasCtx.closePath(); // 闭合躯干
+                canvasCtx.stroke();
+            }
+
+            // 绘制关节圆球
+            canvasCtx.fillStyle = jointColor;
+            [11,12,13,14,15,16,23,24,25,26,27,28].forEach(index => {
+                const p = landmarks[index];
+                canvasCtx.beginPath();
+                canvasCtx.arc(p.x * canvasWidth, p.y * canvasHeight, 15, 0, 2*Math.PI);
+                canvasCtx.fill();
+            });
+
+            // 绘制大眼睛脑袋
+            const nose = landmarks[0];
+            canvasCtx.fillStyle = limbColor;
+            canvasCtx.beginPath();
+            canvasCtx.arc(nose.x * canvasWidth, nose.y * canvasHeight, 40, 0, 2*Math.PI);
+            canvasCtx.fill();
+            
+            // 眼睛
+            canvasCtx.fillStyle = 'white';
+            canvasCtx.beginPath();
+            canvasCtx.arc(nose.x * canvasWidth - 15, nose.y * canvasHeight - 5, 10, 0, 2*Math.PI);
+            canvasCtx.arc(nose.x * canvasWidth + 15, nose.y * canvasHeight - 5, 10, 0, 2*Math.PI);
+            canvasCtx.fill();
+            canvasCtx.fillStyle = 'black';
+            canvasCtx.beginPath();
+            canvasCtx.arc(nose.x * canvasWidth - 15, nose.y * canvasHeight - 5, 4, 0, 2*Math.PI);
+            canvasCtx.arc(nose.x * canvasWidth + 15, nose.y * canvasHeight - 5, 4, 0, 2*Math.PI);
+            canvasCtx.fill();
+        }
+
+        // --- MediaPipe 结果回调 ---
+        function onResults(results) {
+            loadingScreen.style.display = 'none';
+            
+            // 清空画布
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            // 绘制摄像头背景 (可选：如果不想要背景，注释掉这一行)
+            // canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+            
+            // 如果有检测到姿态
+            if (results.poseLandmarks) {
+                // 根据当前模式绘制
+                if (currentMode === 'stickman') {
+                    drawStickman(results.poseLandmarks);
+                } else if (currentMode === 'neon') {
+                    drawNeon(results.poseLandmarks);
+                } else if (currentMode === 'jelly') {
+                    drawJelly(results.poseLandmarks);
+                }
+            }
+            
+            canvasCtx.restore();
+        }
+
+        // 初始化 MediaPipe Pose
+        const pose = new Pose({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+        }});
+
+        pose.setOptions({
+            modelComplexity: 1,
+            smoothLandmarks: true,
+            enableSegmentation: false,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        pose.onResults(onResults);
+
+        // 启动摄像头
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await pose.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+
+    </script>
+</body>
+</html>

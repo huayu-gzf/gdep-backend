@@ -1,0 +1,902 @@
+:root {
+    /* ================= 核心变量定义 ================= */
+    
+    /* 1. 布局尺寸 */
+    --sidebar-width: 260px;
+    --header-height: auto;
+    
+    /* 2. 主色调 - 现代蓝色系 */
+    --primary: #0070f3;
+    --primary-dark: #0051aa;
+    --primary-light: #e6f0ff;
+    --primary-accent: #40a9ff;
+    --primary-glow: rgba(0, 112, 243, 0.15);
+    
+    /* 3. 辅助功能色 */
+    --secondary: #36cfc9;
+    --success: #52c41a;
+    --warning: #faad14;
+    --danger: #ff4d4f;
+    --info: #1890ff;
+    
+    /* 4. 中性色系 */
+    --dark: #1d2129;
+    --gray-dark: #4e5969;
+    --gray: #86909c;
+    --gray-light: #c9cdD4;
+    --light: #f2f3f5;
+    --white: #ffffff;
+    --background: #f7f9fc;
+    
+    /* 5. 文字颜色 */
+    --text-primary: #1d2129;
+    --text-secondary: #4e5969;
+    --text-muted: #86909c;
+    
+    /* 6. 边框与阴影 (优化质感) */
+    --border-light: #e5e6eb;
+    --border: #dcdfe6;
+    --border-radius: 8px;
+    --border-radius-lg: 12px;
+    
+    /* 更柔和的现代阴影 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* 7. 字体与动效 */
+    --font-primary: 'Inter', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 新增：导航栏背景变量 */
+    --nav-bg: rgba(255, 255, 255, 0.95);
+}
+
+/* ========================================= 
+    暗黑模式变量覆盖 (终极修复版) 
+    ========================================= */ 
+ [data-theme="dark"] { 
+     /* 1. 核心变量反转 */ 
+     --primary: #3291ff; 
+     --primary-dark: #0070f3; 
+     --primary-light: #112a45; 
+     --primary-glow: rgba(50, 145, 255, 0.2); 
+ 
+     /* 加 !important 确保覆盖所有默认白色 */ 
+     --white: #161b22 !important; 
+     --background: #0d1117 !important; 
+     --light: #21262d !important; 
+     
+     /* 导航栏专用深色背景 */ 
+     --nav-bg: #161b22 !important; 
+     
+     --text-primary: #f0f6fc !important; 
+     --text-secondary: #c9d1d9 !important; 
+     --text-muted: #8b949e !important; 
+     
+     --border-light: #30363d !important; 
+     --border: #30363d !important; 
+     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.9) !important; 
+ } 
+ 
+ /* ------------------------------------------------ 
+    针对暗黑模式的特殊元素强制修复 
+    ------------------------------------------------ */ 
+ 
+ /* 1. 修复导航栏和全局背景 */ 
+ /* 这里的关键是让 nav 和 body 保持一致的背景，防止视觉闪烁 */ 
+ [data-theme="dark"] nav { 
+     background-color: var(--nav-bg) !important; 
+     border-bottom-color: var(--border) !important; 
+ } 
+ 
+ [data-theme="dark"] body { 
+     background-image: none !important; /* 去掉点状纹理，纯黑更护眼 */ 
+ } 
+ 
+ /* 2. 修复 AI 助手 (去除白色渐变) */ 
+ [data-theme="dark"] .ai-assistant { 
+     background: var(--white) !important; /* 强制覆盖 linear-gradient */ 
+     border-color: var(--border) !important; 
+ } 
+ 
+ /* 3. 【核心】修复 Services 页面流程图的“内联样式” */ 
+ /* 使用属性选择器，强行覆盖 HTML 里写的 style="background-color:..." */ 
+ [data-theme="dark"] .service-section div[style*="background-color"], 
+ [data-theme="dark"] .service-section ol[style*="background-color"], 
+ [data-theme="dark"] .service-section li[style*="background-color"] { 
+     background-color: #21262d !important; /* 变成深灰色 */ 
+     color: var(--text-primary) !important; 
+     border: 1px solid var(--border) !important; /* 加个边框防止看不清 */ 
+ } 
+ 
+ /* 4. 修复流程图里的 SVG 箭头颜色 */ 
+ [data-theme="dark"] .service-section svg path { 
+     stroke: var(--text-secondary) !important; /* 箭头变灰白 */ 
+ } 
+ 
+ /* 5. 修复表格 */ 
+ [data-theme="dark"] table, 
+ [data-theme="dark"] tr, 
+ [data-theme="dark"] th, 
+ [data-theme="dark"] td { 
+     background-color: var(--white) !important; 
+     color: var(--text-primary) !important; 
+     border-color: var(--border) !important; 
+ } 
+ 
+ /* 6. 修复搜索框 */ 
+ [data-theme="dark"] .nav-search-input { 
+     background-color: #0d1117 !important; 
+     color: #fff !important; 
+     border-color: var(--border) !important; 
+ }
+
+/* =========================================
+   1. 全局重置与基础设置
+   ========================================= */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    height: 100%;
+    scroll-behavior: smooth; /* 全局平滑滚动 */
+}
+
+body {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--background);
+    /* 细微的网格背景纹理 */
+    background-image: 
+        radial-gradient(rgba(0, 112, 243, 0.03) 1px, transparent 1px),
+        radial-gradient(rgba(0, 112, 243, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    
+    /* 核心布局：Flex列模式，禁止整页滚动 */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* =========================================
+   2. 滚动条美化 (兼容 Chrome & Firefox)
+   ========================================= */
+/* Firefox 标准 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #c1d9ff #f1f7ff;
+}
+
+/* Chrome/Edge/Safari */
+::-webkit-scrollbar {
+    width: 6px; /* 稍微调细一点，更精致 */
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #c1d9ff;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-accent);
+}
+
+/* =========================================
+   3. 布局组件 (Header, Nav, Footer)
+   ========================================= */
+header, nav, footer {
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--white);
+    padding: 16px 0;
+    text-align: center;
+    box-shadow: var(--shadow);
+    z-index: 100;
+}
+
+header h1 {
+    font-size: clamp(1.25rem, 4vw, 2rem); /* 优化响应式字号 */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+nav {
+    /* 修改这里：使用变量 */
+    background-color: var(--nav-bg);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    z-index: 99;
+    /* 已删除过渡动画，避免主题切换时出现白色残影 */
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+    overflow-x: auto; /* 允许小屏横向滚动 */
+    -webkit-overflow-scrolling: touch; /* iOS顺滑滚动 */
+}
+
+/* 隐藏导航栏滚动条但保留功能 */
+.nav-container::-webkit-scrollbar {
+    display: none; 
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.nav-links a {
+    display: block;
+    padding: 14px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+    background-color: rgba(0, 112, 243, 0.04);
+}
+
+/* 激活状态 */
+.nav-links a.active,
+.nav-links a.active-check {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.nav-links a.active::after,
+.nav-links a.active-check::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background-color: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* =========================================
+   4. 内容主体布局
+   ========================================= */
+.content-container {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    padding: 24px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden; /* 关键：锁定外层，让内部独立滚动 */
+}
+
+/* 左侧边栏 */
+.sidebar {
+    flex: 0 0 var(--sidebar-width);
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 24px 20px;
+    border: 1px solid var(--border-light);
+    
+    /* 独立滚动 */
+    height: 100%;
+    overflow-y: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar h3 {
+    color: var(--primary);
+    font-size: 18px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    margin-bottom: 6px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.sidebar a:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    transform: translateX(4px); /* 悬浮微动效 */
+}
+
+.sidebar a.active {
+    background-color: var(--primary);
+    color: var(--white);
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0, 112, 243, 0.3);
+}
+
+/* 右侧主内容区 */
+.main-content {
+    flex: 1;
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 32px;
+    border: 1px solid var(--border-light);
+    min-width: 0; /* 防止内容撑破 Flex */
+    
+    /* 独立滚动 */
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* =========================================
+   5. 通用组件样式 (排版、卡片、图片)
+   ========================================= */
+/* 排版 */
+.section-content h2 {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 15px;
+    margin: 0 0 25px 0;
+    font-size: 24px;
+}
+
+.section-content h3 {
+    color: var(--text-primary);
+    margin: 32px 0 16px 0;
+    font-size: 19px;
+    border-left: 4px solid var(--primary);
+    padding-left: 14px;
+    line-height: 1.4;
+}
+
+.section-content p {
+    margin-bottom: 16px;
+    text-align: justify;
+    line-height: 1.75; /* 增加行高提升阅读体验 */
+    color: var(--text-secondary);
+}
+
+/* 列表 */
+.section-content ul, .section-content ol {
+    margin-bottom: 20px;
+    padding-left: 24px;
+    color: var(--text-secondary);
+}
+.section-content li { margin-bottom: 8px; }
+
+/* 图片自适应工具类 */
+.responsive-img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin: 20px auto;
+}
+
+/* 信息卡片 */
+.info-box {
+    background-color: rgba(0, 112, 243, 0.03);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary);
+    margin: 24px 0;
+}
+
+/* 智能助手区域 */
+.ai-assistant {
+    margin-top: 40px;
+    padding: 24px;
+    background: linear-gradient(to right, #f8f9fa, #fff);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+.ai-assistant h3 { color: var(--primary); margin-top: 0; }
+
+/* 表格优化 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+}
+
+th {
+    background: var(--light);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 2px solid var(--border-light);
+}
+
+td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-secondary);
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover { background-color: var(--background); }
+
+/* =========================================
+   6. 移动端适配 (深度优化版)
+   ========================================= */
+/* 默认隐藏菜单按钮 */
+.menu-toggle, .sidebar-overlay { display: none; }
+
+@media (max-width: 768px) {
+    /* 1. 全局布局调整 */
+    body {
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+    }
+    
+    .content-container {
+        flex-direction: column;
+        padding: 0; /* 移除外边距，让内容贴边 */
+        gap: 0;
+    }
+
+    /* 2. 导航栏调整 */
+    .nav-links {
+        justify-content: flex-start; /* 左对齐 */
+        padding: 0 10px;
+    }
+    .nav-links a {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    /* 3. 侧边栏 (抽屉模式) */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px; /* 移动端固定宽 */
+        z-index: 1001;
+        transform: translateX(-100%);
+        border-radius: 0;
+        border: none;
+        box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+        will-change: transform; /* 性能优化 */
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* 遮罩层 */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(3px); /* 磨砂玻璃背景 */
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    /* 1. 移动端菜单按钮 */
+    .menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        width: 44px;
+        height: 44px;
+        background-color: transparent;
+        color: #fff; /* 默认白色(在蓝色Header上) */
+        z-index: 1002;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        /* 添加过渡动画，让它能平滑消失 */
+        transition: opacity 0.3s ease, transform 0.2s;
+    }
+
+    /* 【关键】当 body 有 sidebar-open 类时，隐藏这个按钮 */
+    body.sidebar-open .menu-toggle {
+        opacity: 0;
+        pointer-events: none; /* 让它点不到 */
+    }
+
+    /* 2. 遮罩层 (点击空白关闭) */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        z-index: 1001; /* 必须要比内容高，但比侧边栏低 */
+        opacity: 0;
+        visibility: hidden; /* 默认隐藏且不可点 */
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible; /* 激活时可见且可点 */
+    }
+
+    /* 2. 修正：回到顶部按钮在手机上的位置 */
+    .back-to-top {
+        bottom: 90px;
+        right: 20px;
+        /* 确保它不被侧边栏遮挡，但也别太高 */
+        z-index: 9000;
+    }
+
+    /* 4. 主内容区 (独立滚动) */
+    .main-content {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        padding: 20px 16px 90px 16px; /* 底部预留空间给按钮 */
+    }
+    
+    /* 5. 表格卡片化 */
+    table, thead, tbody, th, td, tr { display: block; }
+    thead tr { position: absolute; top: -9999px; left: -9999px; }
+    
+    tr {
+        margin-bottom: 16px;
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        background: var(--white);
+        padding: 8px 0;
+    }
+    
+    td {
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        position: relative;
+        padding-left: 40%; /* 为标签留空 */
+        padding-right: 12px;
+        text-align: right;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    td:last-child { border-bottom: none; }
+    
+    td::before {
+        position: absolute;
+        left: 12px;
+        width: 35%;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        content: attr(data-label);
+        color: var(--text-secondary);
+        font-size: 13px;
+    }
+}
+
+/* =========================================
+   7. 页脚
+   ========================================= */
+footer {
+    text-align: center;
+    padding: 16px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    background-color: var(--white);
+    border-top: 1px solid var(--border-light);
+}
+
+/* =========================================
+   8. 全局搜索框 (通过 JS 动态插入)
+   ========================================= */
+/* 搜索框容器 li 的样式 */
+.search-item {
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+/* 搜索输入框 */
+.nav-search-input {
+    padding: 8px 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    font-size: 14px;
+    width: 180px;
+    background-color: #f8f9fa;
+    color: #333; /* 确保文字颜色与背景有对比 */
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+/* 聚焦时的效果 */
+.nav-search-input:focus {
+    width: 220px; /* 聚焦变宽 */
+    border-color: var(--primary);
+    background-color: var(--white);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* 鼠标悬停和获取焦点时的容器效果 */
+.search-item:hover,
+.search-item:focus-within {
+    /* 确保容器也有平滑过渡效果 */
+    transition: all 0.3s ease;
+}
+
+/* =========================================
+   修复：移动端搜索框适配 (放在 common.css 最底部)
+   ========================================= */
+@media (max-width: 768px) {
+    /* 1. 搜索框的外层容器 */
+    .search-item {
+        margin: 0 10px;
+        /* 关键：防止容器被 Flex 布局挤压变形 */
+        flex-shrink: 0;
+        /* 移除之前的 100% - 30px，改用自适应，由内部 input 撑开 */
+        width: auto !important;
+        background: transparent; /* 容器背景透明，让 input 自己控制背景 */
+        box-shadow: none; /* 移除容器阴影，避免双重阴影 */
+    }
+    
+    /* 2. 搜索输入框本体 */
+    .nav-search-input {
+        /* 默认状态：固定宽度，保证显示正常 */
+        width: 160px !important;
+        transition: width 0.3s ease; /* 平滑动画 */
+    }
+    
+    /* 3. 核心修复：点击聚焦时的样式 */
+    /* 同时也涵盖了 hover 状态，保证交互一致 */
+    .search-item:hover > .nav-search-input,
+    .search-item:focus-within > .nav-search-input,
+    .nav-search-input:focus {
+        /* 【关键点】不要用 100%，改用 65vw */
+        /* vw 代表视口宽度的百分比，65vw 就是屏幕宽度的 65% */
+        width: 65vw !important;
+        
+        /* 确保背景和文字清晰 */
+        background-color: var(--bg-card) !important;
+        color: var(--text-dark) !important;
+        box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+}
+
+/* =========================================
+   Toast 轻提示 (替代 Alert 弹窗)
+   ========================================= */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-150%); /* 默认隐藏在屏幕上方 */
+    background-color: rgba(0, 0, 0, 0.85); /* 深色半透明背景 */
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px; /* 胶囊形状 */
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000; /* 保证在最顶层 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* 弹性动画 */
+    pointer-events: none; /* 隐藏时不阻挡点击 */
+}
+
+/* 激活状态：滑入显示 */
+.toast-notification.show {
+    transform: translateX(-50%) translateY(20px); /* 滑入到顶部下方 20px 处 */
+    opacity: 1;
+}
+
+/* 移动端微调：防止贴顶太近 */
+@media (max-width: 768px) {
+    .toast-notification {
+        width: 90%; /* 手机上宽度自适应 */
+        justify-content: center;
+        text-align: center;
+        font-size: 13px;
+    }
+}
+
+/* =========================================
+   搜索高亮 - 柔和呼吸灯效果 (修复暗黑模式文字颜色)
+   ========================================= */
+/* 定义高亮关键词的样式 */
+.search-highlight-text {
+    border-radius: 4px;
+    animation: highlight-fade 4s ease-out forwards; /* 持续4秒后定格 */
+    font-weight: bold;
+    /* 删掉了这里的 color: #000; 改由动画控制 */
+}
+
+/* 动画关键帧：背景色从亮黄变透明，文字从黑变主题色 */
+@keyframes highlight-fade {
+    0% {
+        background-color: rgba(255, 235, 59, 0.8); /* 初始：明显的亮黄 */
+        box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+        color: #000; /* 高亮时强制黑色，保证对比度 */
+    }
+    30% {
+        background-color: rgba(255, 235, 59, 0.8);
+        color: #000; /* 保持黑色 */
+    }
+    100% {
+        background-color: transparent; /* 最后：背景透明 */
+        box-shadow: none;
+        color: var(--text-primary); /* 【关键】恢复为当前主题的文字颜色 */
+    }
+}
+
+/* =========================================
+   回到顶部按钮 (小火箭)
+   ========================================= */
+.back-to-top {
+    position: fixed;
+    bottom: 100px; /* 位于 AI 浮窗上方 (AI通常在 bottom:30px) */
+    right: 30px;
+    width: 46px;
+    height: 46px;
+    background-color: var(--white);
+    color: var(--primary);
+    border: 1px solid var(--border-light);
+    border-radius: 50%; /* 圆形 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+    opacity: 0; /* 默认隐身 */
+    visibility: hidden; /* 彻底隐藏，不挡点击 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9990; /* 略低于 AI 助手 */
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* 激活状态：显示出来 */
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* 悬浮效果 */
+.back-to-top:hover {
+    background-color: var(--primary);
+    color: var(--white);
+    box-shadow: 0 6px 16px rgba(0, 112, 243, 0.3);
+    transform: translateY(-4px); /* 轻轻上浮 */
+}
+
+/* 移动端微调 */
+@media (max-width: 768px) {
+    .back-to-top {
+        right: 20px;
+        bottom: 90px; /* 手机上调整位置 */
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+}
+
+/* =========================================
+   暗黑模式切换开关 (Theme Toggle)
+   ========================================= */
+.theme-toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 10px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--light);
+    color: var(--primary);
+    transform: rotate(15deg); /* 悬浮时转一下，很可爱 */
+}
+
+/* 移动端适配：放到导航栏右侧或者集成到侧边栏 */
+@media (max-width: 768px) {
+    .theme-toggle-btn {
+        margin-left: 5px;
+        padding: 6px;
+    }
+}
+
+/* =========================================
+   暗黑模式 - 滚动条适配 (放在 common.css 最底部)
+   ========================================= */
+
+/* 1. 告诉浏览器这个页面支持暗黑模式 (这会让原生表单控件也变黑) */
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+/* 2. Firefox 暗黑滚动条 */
+[data-theme="dark"] * {
+    scrollbar-color: #4e5969 #161b22; /* 滑块颜色 轨道颜色 */
+}
+
+/* 3. Chrome/Edge/Safari 暗黑滚动条 */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #0d1117; /* 轨道变深黑 */
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background-color: #30363d; /* 滑块变深灰 */
+    border: 1px solid #0d1117; /* 给滑块加个黑边，更有层次感 */
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background-color: #3291ff; /* 鼠标悬停变亮蓝，与主色调呼应 */
+}
+
+/* 4. 确保横向滚动条（如表格）也变黑 */
+[data-theme="dark"] .nav-container::-webkit-scrollbar-track,
+[data-theme="dark"] .sidebar::-webkit-scrollbar-track {
+    background: #161b22;
+}

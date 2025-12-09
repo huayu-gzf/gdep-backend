@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学校简介 - 校徽校训 - 广东工程职业技术学院迎新助手</title>
+    <link rel="stylesheet" href="./common.css">
+    <style>
+    /* 所有样式已移至common.css文件中统一管理 */
+</style>
+    <!-- 扣子SDK集成 - 引用统一的集成文件 -->
+    <script src="../coze-integration.js"></script>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <header>
+        <h1>广东工程职业技术学院迎新助手</h1>
+    </header>
+
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="school-overview.html" class="active">学校概况</a></li>
+                <li><a href="regulations-1.html">规章制度</a></li>
+                <li><a href="services-1.html">迎新服务</a></li>
+                <li><a href="self-examination.html">入学自查</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        <aside class="sidebar">
+            <h3>学校概况</h3>
+            <ul>
+                <li><a href="school-overview.html">1. 整体情况</a></li>
+                <li><a href="school-badge.html" class="active">2. 校徽校训</a></li>
+                <li><a href="school-song.html">3. 校歌《筑梦同行》</a></li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <section class="section-content">
+                <h2>校徽校训介绍</h2>
+            
+            <h3>校徽</h3>
+            <div class="badge-container">
+                <img src="../images/1.png" alt="广东工程职业技术学院校徽" class="responsive-img">
+            </div>
+            <p>广东工程职业技术学院校徽采用圆形设计，体现了学校的团结、和谐与完整。校徽主体由红色和白色组成，红色象征着热情、活力与进取精神，体现了学校积极向上的氛围和红色文化底蕴。</p>
+            
+            <p>校徽外圈环绕着学院名称的中英文全称，中央包含建校年份"1958"和象征学校精神的凤凰图案，体现了学校悠久的办学历史和深厚的文化底蕴。整体设计简洁大方，寓意深远，展现了学校作为高等职业院校的专业性和现代感。</p>
+            
+            <h3>校训</h3>
+            <div class="motto-box">
+                <div class="motto-text">工于建构 成于创造</div>
+            </div>
+            
+            <p>校训是全体师生都要铭记的教诲，是学校管理及教育教学的灵魂所在，它影响和规范了师生的思维模式和行为方式。</p>
+            
+            <p>"工于建构，成于创造"具有由表及里的三层含义，内涵逐层加深。首先，"工"与"成"使人联想到"工程"，将学院的名称隐藏在其中，即便于记忆，又感亲切。</p>
+            
+            <p>其次，工是擅长的意思，建构的思维方式具有典型的工科特征，被广泛应用于建筑设计等领域。将建构和创造结合，突出了学院的工科特质。</p>
+            
+            <p>再次，建构意指建构主义学习理论，其主旨是以学生为中心，学习是由学生自己主动建构知识的过程，教师由知识的传授者转变为学生主动建构意义的帮助者、促进者。这与我院提出的以学生为本位、"未来订单"的教育模式的内涵和操作方法是一致的，表明了与我院倡导的办学宗旨、办学指导思想一脉相承的特征。</p>
+            </section>
+
+            <!-- 智能迎新助手 -->
+            <div class="ai-assistant">
+                <h3>智能迎新助手</h3>
+                <p>有任何疑问，欢迎咨询智能迎新助手获取即时帮助！</p>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2024 广东工程职业技术学院 版权所有</p>
+        <p>地址：广东省广州市天河区渔兴路18号 邮编：510520</p>
+    </footer>
+
+    <script>
+        // 页面加载完成后的操作
+        document.addEventListener('DOMContentLoaded', function() {
+            // 滚动到顶部按钮功能
+            window.onscroll = function() {
+                scrollFunction();
+            };
+            
+            // 侧边栏自动滚动到当前活动链接位置
+            const activeLink = document.querySelector('.sidebar a.active');
+            if (activeLink) {
+                const sidebar = document.querySelector('.sidebar');
+                // 计算活动链接相对于侧边栏的位置
+                const linkPosition = activeLink.getBoundingClientRect().top - sidebar.getBoundingClientRect().top;
+                // 滚动侧边栏，使活动链接位于侧边栏中间位置
+                sidebar.scrollTop = linkPosition - sidebar.clientHeight / 2;
+            }
+        });
+    </script>
+    <!-- 扣子SDK集成 - 引用统一的集成文件 -->
+</body>
+</html>

@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员批量添加学生系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow: auto;
+            position: relative;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" opacity="0.05"><polygon fill="white" points="0,1000 1000,0 1000,1000"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .main-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 40px);
+        }
+        
+        .container {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            width: 100%;
+            max-width: 1400px;
+            height: auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding: 0 50px;
+        }
+        
+        .user-switch {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        
+        .btn-back {
+            background: transparent;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-back:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+        }
+        
+        .header h1 {
+            color: var(--dark);
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            /* 修正渐变文字效果 */
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* 为不支持该特性的浏览器提供回退颜色 */
+            color: var(--primary);
+        }
+        
+        .header p {
+            color: var(--gray);
+            font-size: 16px;
+        }
+        
+        .form-container {
+            background: var(--light);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .form-container:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: none;
+            flex: 1;
+            min-height: 120px;
+            max-height: 180px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group input[type="file"] {
+            display: none;
+        }
+        
+        .file-upload-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 24px;
+            background: var(--info);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: fit-content;
+        }
+        
+        .file-upload-label:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .file-name {
+            margin-left: 10px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h3 i {
+            color: var(--primary);
+        }
+        
+        /* 结果提示栏样式 */
+        .result {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            padding: 18px 25px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 80%;
+            width: auto;
+            text-align: center;
+            opacity: 0;
+            animation: slideInFade 0.4s ease-out forwards;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .result h4 {
+            color: var(--dark);
+            margin-bottom: 4px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .result p {
+            color: var(--dark);
+            margin-bottom: 0;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+        
+        .success {
+            background: rgba(236, 253, 245, 0.98);
+            border-left: 4px solid var(--success);
+        }
+        
+        .error {
+            background: rgba(254, 242, 242, 0.98);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .info {
+            background: rgba(239, 246, 255, 0.98);
+            border-left: 4px solid var(--info);
+        }
+        
+        .note {
+            background: #fff8e6;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning);
+            margin-bottom: 20px;
+        }
+        
+        .note p {
+            margin: 0;
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* 动画关键帧 */
+        @keyframes slideInFade {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50px);
+            }
+        }
+        
+        .result.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        
+        .flex-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .flex-container .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .batch-container {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 30px;
+            height: auto;
+            min-height: 320px;
+        }
+        
+        .batch-left, .batch-right {
+            flex: 1;
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .batch-left:hover, .batch-right:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .batch-left h3, .batch-right h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .batch-left .note, .batch-right .note {
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        /* 学生列表管理区域 */
+        #studentListSection {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .table-header h3 {
+            margin-bottom: 0;
+            color: var(--dark);
+        }
+        
+        .btn-add {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-add:hover {
+            background: #0da271;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        #studentForm {
+            background: var(--light);
+            padding: 25px;
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        #formTitle {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .btn-save {
+            background: var(--success);
+            padding: 12px 20px;
+            width: auto;
+            height: 46px;
+        }
+        
+        .btn-cancel {
+            background: var(--gray);
+            padding: 12px 20px;
+            width: auto;
+            height: 46px;
+        }
+        
+        #studentTableContainer {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        
+        #studentTable {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        #studentTable thead {
+            background: var(--light);
+            position: sticky;
+            top: 0;
+        }
+        
+        #studentTable th {
+            padding: 16px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        #studentTable td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--dark);
+            font-size: 14px;
+        }
+        
+        #studentTable tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .btn-edit {
+            background: var(--info);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+        
+        .btn-edit:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        
+        .btn-select-all {
+            background: var(--info);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn-select-all:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn-batch-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-batch-delete:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        
+        .btn-batch-delete:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #noStudentsMessage {
+            text-align: center;
+            padding: 50px;
+            color: var(--gray);
+            font-size: 16px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .batch-container {
+                flex-direction: column;
+            }
+            
+            .batch-left, .batch-right {
+                width: 100%;
+            }
+        }
+        
+        /* --- admin.html 移动端适配增强 --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                overflow: visible; /* 允许内容溢出处理 */
+            }
+
+            .header {
+                padding: 40px 0 0 0; /* 留出顶部按钮空间 */
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .user-switch {
+                top: -10px;
+                right: 0;
+            }
+
+            /* 批量添加区域改为上下排列 */
+            .batch-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .batch-left, .batch-right {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            /* 按钮区域 */
+            .flex-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .flex-container .btn {
+                width: 100%;
+            }
+
+            /* 表格区域适配：增加横向滚动条 */
+            #studentTableContainer {
+                border: 1px solid var(--border);
+                box-shadow: none;
+                overflow-x: auto; /* 关键：允许横向滚动 */
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #studentTable {
+                min-width: 600px; /* 强制表格最小宽度，触发滚动 */
+            }
+
+            /* 表单输入框适配 */
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-row .form-group {
+                width: 100%;
+                min-width: auto;
+            }
+
+            /* 结果提示框适配 */
+            .result {
+                width: 90%;
+                max-width: 90%;
+                padding: 15px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="user-switch">
+                    <button class="btn-back" onclick="window.location.href='login.html'">
+                        <i class="fas fa-arrow-left"></i>
+                        普通用户登录
+                    </button>
+                </div>
+                <h1>管理员批量添加学生系统</h1>
+                <p>安全、高效地批量创建学生账号</p>
+            </div>
+            
+            <!-- 登录表单 -->
+            <div id="loginForm" class="form-container">
+                <h3><i class="fas fa-user-shield"></i>管理员登录</h3>
+                <div class="form-group">
+                    <label for="admin-username">用户名</label>
+                    <input type="text" id="admin-username" placeholder="请输入管理员用户名" required 
+                           onkeyup="if(event.key === 'Enter') document.getElementById('admin-password').focus()">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">密码</label>
+                    <input type="password" id="admin-password" placeholder="请输入管理员密码" required
+                           onkeyup="if(event.key === 'Enter') adminLogin()">
+                </div>
+                <button class="btn" onclick="adminLogin()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    登录
+                </button>
+            </div>
+            
+            <!-- 批量添加表单 -->
+            <div id="batchForm" class="form-container" style="display: none;">
+                <div class="batch-container">
+                    <div class="batch-left">
+                        <h3><i class="fas fa-file-alt"></i>批量添加学生（文本输入）</h3>
+                        <div class="note">
+                            <p><strong>格式说明：</strong>一行一个学生信息，格式为：学号,姓名,专业（注意使用英文逗号分隔）</p>
+                            <p><strong>示例：</strong></p>
+                            <p>2024001,张三,计算机科学与技术<br>
+                            2024002,李四,软件工程<br>
+                            2024003,王五,人工智能</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentList">学生列表</label>
+                            <textarea id="studentList" placeholder="请输入学生信息，每行格式：学号,姓名,专业&#10;当不输入密码时，系统会自动生成默认密码：Student + 学号后6位&#10;例如：学号2324090100 → 密码Student090100"></textarea>
+                        </div>
+                        <button class="btn" onclick="batchCreateStudents()">
+                            <i class="fas fa-users"></i>
+                            批量添加
+                        </button>
+                    </div>
+                    
+                    <div class="batch-right">
+                        <h3><i class="fas fa-file-excel"></i>批量添加学生（Excel上传）</h3>
+                        <div class="note">
+                            <p><strong>格式要求：</strong>Excel文件需包含三列：username（学号）、name（姓名）、major（专业）</p>
+                            <p><strong>重要：</strong>文件首行必须为标题行，包含username、name、major三列</p>
+                            <p><strong>支持格式：</strong>.xlsx, .xls</p>
+                            <p><strong>示例：</strong></p>
+                            <p style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace;">
+                                username&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;major<br>
+                                2024001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;张三&nbsp;&nbsp;&nbsp;&nbsp;计算机科学与技术<br>
+                                2024002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;李四&nbsp;&nbsp;&nbsp;&nbsp;软件工程
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <input type="file" id="excelFile" accept=".xlsx,.xls">
+                            <label for="excelFile" class="file-upload-label">
+                                <i class="fas fa-upload"></i>
+                                选择Excel文件
+                            </label>
+                            <span id="fileName" class="file-name">未选择文件</span>
+                        </div>
+                        <button class="btn" onclick="uploadExcel()" disabled id="uploadBtn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            上传并添加
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="flex-container" style="margin-top: 20px;">
+                    <button class="btn" onclick="getStudentList()" style="flex: 1;">
+                        <i class="fas fa-list"></i>
+                        查看学生列表
+                    </button>
+                    <button class="btn" onclick="logout()" style="background: var(--danger); flex: 1;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        退出登录
+                    </button>
+                </div>
+                
+                <!-- 学生列表管理区域 -->
+                <div id="studentListSection" style="display: none; margin-top: 30px;">
+                    <div class="table-header">
+                        <h3><i class="fas fa-user-graduate"></i>学生列表管理</h3>
+                        <button class="btn-add" onclick="showAddStudentForm()">
+                            <i class="fas fa-plus"></i>
+                            添加学生
+                        </button>
+                    </div>
+                    
+                    <!-- 添加/编辑学生表单 -->
+                    <div id="studentForm" style="display: none;">
+                        <h4 id="formTitle">添加学生</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>学号：</label>
+                                <input type="text" id="studentUsername" placeholder="请输入学号"
+                                       onkeyup="if(event.key === 'Enter') document.getElementById('studentName').focus()">
+                            </div>
+                            <div class="form-group">
+                                <label>姓名：</label>
+                                <input type="text" id="studentName" placeholder="请输入姓名"
+                                       onkeyup="if(event.key === 'Enter') document.getElementById('studentMajor').focus()">
+                            </div>
+                            <div class="form-group">
+                                <label>专业：</label>
+                                <input type="text" id="studentMajor" placeholder="请输入专业"
+                                       onkeyup="if(event.key === 'Enter') document.getElementById('studentPassword').focus()">
+                            </div>
+                            <div class="form-group">
+                                <label for="studentPassword">密码（可选）：</label>
+                                <input type="password" id="studentPassword" placeholder="留空则保持原密码不变"
+                                       onkeyup="if(event.key === 'Enter') saveStudent()">
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn btn-save" onclick="saveStudent()">
+                                    <i class="fas fa-save"></i>
+                                    保存
+                                </button>
+                                <button class="btn btn-cancel" onclick="cancelStudentForm()">
+                                    <i class="fas fa-times"></i>
+                                    取消
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 学生列表表格 -->
+                    <div id="studentTableContainer">
+                        <div id="batchDeleteControls" style="display: none; margin-bottom: 10px;">
+                            <button id="selectAllBtn" onclick="toggleSelectAll()" class="btn-select-all">全选</button>
+                            <button id="batchDeleteBtn" onclick="batchDeleteStudents()" class="btn-batch-delete" disabled>批量删除</button>
+                            <span id="selectedCount" style="margin-left: 10px; color: #666;">已选择 0 人</span>
+                        </div>
+                        <table id="studentTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()" style="margin: 0;">
+                                    </th>
+                                    <th>学号</th>
+                                    <th>姓名</th>
+                                    <th>专业</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                <!-- 学生数据将在这里动态加载 -->
+                            </tbody>
+                        </table>
+                        <div id="noStudentsMessage" style="display: none;">
+                            暂无学生数据
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 结果显示区域 - 保持在页面级别 -->
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        // 页面加载完成后自动聚焦到用户名输入框
+        window.addEventListener('load', function() {
+            document.getElementById('admin-username').focus();
+        });
+        
+        // 文件选择处理
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '注意：文件首行必须为username,name,major';
+            document.getElementById('fileName').textContent = fileName;
+            document.getElementById('uploadBtn').disabled = !e.target.files[0];
+        });
+        
+        // 管理员登录函数
+        async function adminLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            if (!username || !password) {
+                showResult('请输入用户名和密码', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch('https://gdep-backend.vercel.app/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.message || '登录失败');
+                }
+                
+                // 检查是否为管理员
+                if (data.user && data.user.role !== 'admin') {
+                    throw new Error('不是管理员账号，无权限访问');
+                }
+                
+                // 存储token
+                localStorage.setItem('adminToken', data.token);
+                
+                // 显示批量添加页面
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('batchForm').style.display = 'block';
+                showResult('登录成功！欢迎回来，管理员', 'success');
+                
+            } catch (err) {
+                showResult(err.message || '登录失败，请检查用户名和密码', 'error');
+            }
+        }
+        
+        // 批量添加学生函数
+        async function batchCreateStudents() {
+            const token = localStorage.getItem('adminToken');
+            const text = document.getElementById('studentList').value;
+            
+            console.log('批量添加函数开始执行');
+            console.log('Token是否存在:', !!token);
+            console.log('输入的学生信息:', text);
+            
+            if (!token) {
+                showResult('请先登录', 'error');
+                return;
+            }
+            
+            if (!text.trim()) {
+                showResult('请输入学生信息', 'error');
+                return;
+            }
+            
+            // 解析学生信息
+            console.log('开始解析学生信息，原始输入长度:', text.length);
+            const lines = text.trim().split('\n');
+            console.log('分割后的行数:', lines.length);
+            console.log('每行内容:', lines);
+            
+            const students = lines.map(line => {
+                const parts = line.split(',').map(item => item.trim());
+                console.log('解析行:', line, '得到:', parts);
+                if (parts.length >= 3) {
+                    return {
+                        username: parts[0],
+                        name: parts[1],
+                        major: parts[2]
+                    };
+                }
+                console.log('行格式不正确，跳过:', line);
+                return null;
+            }).filter(item => item !== null);
+            
+            console.log('解析后的学生数据:', students);
+            console.log('有效学生数据数量:', students.length);
+            
+            if (students.length === 0) {
+                showResult('没有有效的学生信息，请检查输入格式', 'error');
+                return;
+            }
+            
+            try {
+                showResult('正在处理批量添加请求...', 'info');
+                
+                console.log('准备发送API请求到: https://gdep-backend.vercel.app/api/admin/batchCreateStudents');
+                console.log('请求头信息:', {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.substring(0, 10)}...` // 只显示token开头部分，保护安全
+                });
+                console.log('请求体数据:', { students });
+                
+                const fetchStartTime = Date.now();
+                const res = await fetch('https://gdep-backend.vercel.app/api/admin/batchCreateStudents', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ students })
+                });
+                
+                const fetchEndTime = Date.now();
+                console.log(`API请求完成，耗时: ${fetchEndTime - fetchStartTime}ms`);
+                console.log('API响应状态:', res.status);
+                console.log('API响应状态文本:', res.statusText);
+                
+                // 检查响应是否为空
+                const contentType = res.headers.get('content-type');
+                console.log('响应内容类型:', contentType);
+                
+                let data;
+                try {
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await res.json();
+                        console.log('API响应数据:', JSON.stringify(data, null, 2));
+                    } else {
+                        const textData = await res.text();
+                        console.log('API响应不是JSON格式，原始文本:', textData);
+                        throw new Error(`响应格式错误: ${textData}`);
+                    }
+                } catch (jsonError) {
+                    console.error('JSON解析错误:', jsonError);
+                    throw new Error(`无法解析API响应: ${jsonError.message}`);
+                }
+                
+                // 统一检查响应状态
+                const responseSuccess = res.ok && (data.success || false);
+                console.log('响应成功状态:', responseSuccess);
+                
+                if (!responseSuccess) {
+                    // 尝试获取错误信息，兼容不同的错误响应格式
+                    const errorMessage = data.message || 
+                                        data.error || 
+                                        data.data?.message || 
+                                        '批量添加失败';
+                    throw new Error(errorMessage);
+                }
+                
+                // 显示结果
+                let message = `批量添加完成！\n`;
+                message += `成功：${data.data?.successCount || data.successCount || 0}人\n`;
+                message += `失败：${data.data?.failCount || data.failCount || 0}人\n`;
+                
+                const duplicates = data.data?.duplicateUsernames || data.duplicateUsernames || [];
+                if (duplicates && duplicates.length > 0) {
+                    message += `重复学号：${duplicates.join(', ')}`;
+                } else {
+                    message += `重复学号：无`;
+                }
+                
+                // 添加失败详情（如果有）
+                const failDetails = data.data?.failDetails || data.failDetails || [];
+                if (failDetails && failDetails.length > 0) {
+                    message += `\n失败详情：\n`;
+                    failDetails.forEach(student => {
+                        message += `${student.username || '未知'}: ${student.reason || '未知错误'}\n`;
+                    });
+                }
+                
+                showResult(message, 'success');
+                
+                // 清空输入框
+                document.getElementById('studentList').value = '';
+                
+            } catch (err) {
+                console.error('批量添加过程中发生错误:', err);
+                showResult('批量添加失败：' + err.message, 'error');
+            }
+        }
+        
+        // Excel上传函数（示例实现，需要后端支持）
+        async function uploadExcel() {
+            const token = localStorage.getItem('adminToken');
+            const fileInput = document.getElementById('excelFile');
+            
+            if (!token) {
+                showResult('请先登录', 'error');
+                return;
+            }
+            
+            if (!fileInput.files[0]) {
+                showResult('请选择Excel文件', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('excelFile', file);
+            
+            try {
+                showResult('正在上传并处理Excel文件...', 'info');
+                
+                // 实际调用后端接口
+                const res = await fetch('https://gdep-backend.vercel.app/api/admin/uploadExcel', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.message || 'Excel上传失败');
+                }
+                
+                // 显示处理结果
+                let message = `Excel处理完成\n`;
+                message += `成功：${data.successCount || 0}人\n`;
+                message += `失败：${data.failCount || 0}人\n`;
+                
+                const duplicates = data.duplicateUsernames || [];
+                if (duplicates.length > 0) {
+                    message += `重复学号：${duplicates.join(', ')}\n`;
+                }
+                
+                const invalidRows = data.invalidRows || [];
+                if (invalidRows.length > 0) {
+                    message += `无效数据行：${invalidRows.length}行\n`;
+                    invalidRows.forEach(row => {
+                        message += `第${row.row}行: ${row.reason}\n`;
+                    });
+                }
+                
+                const failDetails = data.failedStudents || [];
+                if (failDetails.length > 0) {
+                    message += `失败详情：\n`;
+                    failDetails.forEach(student => {
+                        message += `${student.username}: ${student.reason}\n`;
+                    });
+                }
+                
+                showResult(message, 'success');
+                // 清空文件选择
+                fileInput.value = '';
+                document.getElementById('fileName').textContent = '注意：文件首行必须为username,name,major';
+                
+            } catch (err) {
+                showResult('Excel处理失败：' + err.message, 'error');
+            }
+        }
+        
+        // 获取学生列表
+        async function getStudentList() {
+            const token = localStorage.getItem('adminToken');
+            
+            if (!token) {
+                showResult('请先登录', 'error');
+                return;
+            }
+            
+            const studentListSection = document.getElementById('studentListSection');
+            
+            // 如果学生列表区域已经显示，则隐藏它（收纳功能）
+            if (studentListSection.style.display === 'block') {
+                studentListSection.style.display = 'none';
+                return;
+            }
+            
+            try {
+                showResult('正在获取学生列表...', 'info');
+                
+                const res = await fetch('https://gdep-backend.vercel.app/api/admin/students', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.message || '获取学生列表失败');
+                }
+                
+                // 显示学生列表
+                displayStudentList(data.data);
+                
+                // 显示学生列表区域
+                studentListSection.style.display = 'block';
+                
+                showResult(`成功获取 ${data.count} 名学生信息`, 'success');
+                
+            } catch (err) {
+                showResult('获取学生列表失败：' + err.message, 'error');
+            }
+        }
+        
+        // 显示学生列表
+        function displayStudentList(students) {
+            const tbody = document.getElementById('studentTableBody');
+            const noStudentsMessage = document.getElementById('noStudentsMessage');
+            const batchDeleteControls = document.getElementById('batchDeleteControls');
+            
+            tbody.innerHTML = '';
+            
+            if (!students || students.length === 0) {
+                noStudentsMessage.style.display = 'block';
+                batchDeleteControls.style.display = 'none';
+                return;
+            }
+            
+            noStudentsMessage.style.display = 'none';
+            batchDeleteControls.style.display = 'block';
+            
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="student-checkbox" value="${student._id}" onchange="updateSelectedCount()" style="margin: 0;">
+                    </td>
+                    <td>${student.username}</td>
+                    <td>${student.name}</td>
+                    <td>${student.major}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editStudent('${student._id}', '${student.username}', '${student.name}', '${student.major}')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-delete" onclick="deleteStudent('${student._id}', '${student.name}')">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 重置全选复选框和计数
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateSelectedCount();
+        }
+        
+        // 全选/取消全选功能
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+            
+            studentCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            
+            updateSelectedCount();
+        }
+        
+        // 更新已选择数量
+        function updateSelectedCount() {
+            const selectedCheckboxes = document.querySelectorAll('.student-checkbox:checked');
+            const selectedCount = selectedCheckboxes.length;
+            const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+            const selectedCountSpan = document.getElementById('selectedCount');
+            
+            selectedCountSpan.textContent = `已选择 ${selectedCount} 人`;
+            batchDeleteBtn.disabled = selectedCount === 0;
+            
+            // 更新全选复选框状态
+            const totalCheckboxes = document.querySelectorAll('.student-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (totalCheckboxes.length > 0) {
+                selectAllCheckbox.checked = selectedCount === totalCheckboxes.length;
+            }
+        }
+        
+        // 批量删除学生
+        async function batchDeleteStudents() {
+            const token = localStorage.getItem('adminToken');
+            const selectedCheckboxes = document.querySelectorAll('.student-checkbox:checked');
+            
+            if (!token) {
+                showResult('请先登录', 'error');
+                return;
+            }
+            
+            if (selectedCheckboxes.length === 0) {
+                showResult('请选择要删除的学生', 'error');
+                return;
+            }
+            
+            // 确认删除
+            const confirmDelete = confirm(`确定要删除选中的 ${selectedCheckboxes.length} 名学生吗？此操作不可恢复。`);
+            if (!confirmDelete) {
+                return;
+            }
+            
+            const studentIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+            
+            try {
+                showResult('正在批量删除学生...', 'info');
+                
+                const res = await fetch('https://gdep-backend.vercel.app/api/admin/students/batch', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ studentIds })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    showResult(`批量删除成功！已删除 ${data.data.deletedCount} 名学生`, 'success');
+                    // 重新加载学生列表
+                    getStudentList();
+                } else {
+                    showResult(data.message || '批量删除失败', 'error');
+                }
+            } catch (err) {
+                showResult('批量删除失败：' + err.message, 'error');
+            }
+        }
+        
+        // 当前编辑的学生ID
+        let _currentEditingStudentId = null;
+        
+        // 添加全局变量监控
+        Object.defineProperty(window, 'currentEditingStudentId', {
+            get() {
+                return _currentEditingStudentId;
+            },
+            set(value) {
+                console.log(`[GLOBAL DEBUG] currentEditingStudentId 被设置为: ${value} (旧值: ${_currentEditingStudentId})`);
+                console.trace(); // 显示调用栈
+                _currentEditingStudentId = value;
+            }
+        });
+        
+        // 全局调试函数
+        function debugState(location) {
+            console.log(`[DEBUG ${location}] currentEditingStudentId:`, currentEditingStudentId);
+            console.log(`[DEBUG ${location}] window.originalUsername:`, window.originalUsername);
+        }
+        
+        // 显示添加学生表单
+        function showAddStudentForm() {
+            debugState('showAddStudentForm-start');
+            document.getElementById('formTitle').textContent = '添加学生';
+            document.getElementById('studentUsername').value = '';
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentMajor').value = '';
+            document.getElementById('studentPassword').value = '';
+            document.getElementById('studentForm').style.display = 'block';
+            document.getElementById('studentUsername').disabled = false;
+            // 添加模式下，密码输入框提示自动生成默认密码
+            document.getElementById('studentPassword').placeholder = '留空将自动生成默认密码';
+            currentEditingStudentId = null;
+            debugState('showAddStudentForm-end');
+            // 自动聚焦到学号输入框
+            setTimeout(() => {
+                document.getElementById('studentUsername').focus();
+            }, 100);
+        }
+        
+        // 编辑学生
+        function editStudent(id, username, name, major) {
+            console.log('编辑学生函数被调用:', { id, username, name, major });
+            debugState('editStudent-start');
+            document.getElementById('formTitle').textContent = '编辑学生';
+            document.getElementById('studentUsername').value = username;
+            document.getElementById('studentName').value = name;
+            document.getElementById('studentMajor').value = major;
+            document.getElementById('studentPassword').value = '';
+            document.getElementById('studentForm').style.display = 'block';
+            document.getElementById('studentUsername').disabled = true;
+            // 编辑模式下，密码输入框提示保持原密码不变
+            document.getElementById('studentPassword').placeholder = '留空则保持原密码不变';
+            currentEditingStudentId = id;
+            // 保存原始学号用于验证
+            window.originalUsername = username;
+            console.log('设置 currentEditingStudentId 为:', currentEditingStudentId);
+            debugState('editStudent-end');
+            // 编辑模式下自动聚焦到姓名输入框（学号已禁用）
+            setTimeout(() => {
+                document.getElementById('studentName').focus();
+            }, 100);
+        }
+        
+        // 取消学生表单
+        function cancelStudentForm() {
+            debugState('cancelStudentForm-start');
+            document.getElementById('studentForm').style.display = 'none';
+            document.getElementById('studentUsername').value = '';
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentMajor').value = '';
+            document.getElementById('studentPassword').value = '';
+            currentEditingStudentId = null;
+            window.originalUsername = null;
+            debugState('cancelStudentForm-end');
+        }
+        
+        // 保存学生（添加或编辑）
+        async function saveStudent() {
+            debugState('saveStudent-start');
+            const token = localStorage.getItem('adminToken');
+            const username = document.getElementById('studentUsername').value.trim();
+            const name = document.getElementById('studentName').value.trim();
+            const major = document.getElementById('studentMajor').value.trim();
+            const password = document.getElementById('studentPassword').value.trim();
+            
+            console.log('保存学生函数被调用:', { currentEditingStudentId, username, name, major, password });
+            
+            // 关键验证：确保currentEditingStudentId有正确的值
+            if (currentEditingStudentId) {
+                console.log('编辑模式验证 - currentEditingStudentId:', currentEditingStudentId);
+                console.log('编辑模式验证 - 类型:', typeof currentEditingStudentId);
+            } else {
+                console.log('添加模式 - currentEditingStudentId 为 null');
+            }
+            
+            if (!username || !name || !major) {
+                showResult('请填写完整的学生信息', 'error');
+                return;
+            }
+            
+            try {
+                let url, method, body;
+                
+                if (currentEditingStudentId) {
+                    // 编辑模式
+                    url = `https://gdep-backend.vercel.app/api/admin/students/${currentEditingStudentId}`;
+                    method = 'PUT';
+                    const updateData = { name, major };
+                    // 如果是编辑模式且有密码，添加到请求数据中
+                    if (password) {
+                        updateData.password = password;
+                    }
+                    body = JSON.stringify(updateData);
+                } else {
+                    // 添加模式
+                    url = 'https://gdep-backend.vercel.app/api/admin/students';
+                    method = 'POST';
+                    const requestData = { username, name, major };
+                    // 如果是添加模式且有密码，添加到请求数据中
+                    if (password) {
+                        requestData.password = password;
+                    }
+                    body = JSON.stringify(requestData);
+                }
+                
+                showResult(currentEditingStudentId ? '正在更新学生信息...' : '正在添加学生...', 'info');
+                
+                // 在发送请求前再次检查状态
+                debugState('before-fetch');
+                
+                console.log('发送请求:', { url, method, body });
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: body
+                });
+                
+                // 收到响应后立即检查状态
+                debugState('after-fetch');
+                
+                console.log('收到响应:', response.status);
+                
+                const result = await response.json();
+                
+                console.log('响应结果:', result);
+                
+                if (result.success) {
+                    showResult(result.message, 'success');
+                    cancelStudentForm();
+                    getStudentList();
+                } else {
+                    showResult(result.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存学生信息失败:', error);
+                showResult('保存学生信息失败', 'error');
+            }
+        }
+        
+        // 删除学生
+        async function deleteStudent(id, name) {
+            if (!confirm(`确定要删除学生 "${name}" 吗？此操作不可恢复。`)) {
+                return;
+            }
+            
+            const token = localStorage.getItem('adminToken');
+            
+            try {
+                showResult('正在删除学生...', 'info');
+                
+                const res = await fetch(`https://gdep-backend.vercel.app/api/admin/students/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.message || '删除失败');
+                }
+                
+                showResult(data.message || '学生删除成功', 'success');
+                
+                // 从当前列表中移除已删除的学生，避免重新加载整个列表
+                const tbody = document.getElementById('studentTableBody');
+                const rows = tbody.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    const checkbox = rows[i].querySelector('.student-checkbox');
+                    if (checkbox && checkbox.value === id) {
+                        rows[i].remove();
+                        break;
+                    }
+                }
+                
+                // 检查是否还有学生数据
+                const remainingRows = tbody.getElementsByTagName('tr');
+                if (remainingRows.length === 0) {
+                    document.getElementById('noStudentsMessage').style.display = 'block';
+                    document.getElementById('batchDeleteControls').style.display = 'none';
+                } else {
+                    // 更新选择计数
+                    updateSelectedCount();
+                }
+                
+            } catch (err) {
+                showResult('删除失败：' + err.message, 'error');
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('adminToken');
+            document.getElementById('batchForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
+            showResult('已退出登录', 'info');
+        }
+        
+        // 显示结果 - 优化显示逻辑
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            
+            // 清除之前的动画类和样式
+            resultDiv.classList.remove('fade-out');
+            resultDiv.style.display = 'none';
+            
+            // 设置内容和类型
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                         type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            resultDiv.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div>
+                    <h4>${type === 'success' ? '成功' : type === 'error' ? '错误' : '信息'}</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            // 移除所有类型类，添加当前类型
+            resultDiv.classList.remove('success', 'error', 'info');
+            resultDiv.classList.add(type);
+            
+            // 显示提示框
+            setTimeout(() => {
+                resultDiv.style.display = 'block';
+            }, 10); // 确保动画能正常触发
+            
+            // 自动隐藏所有类型的消息（3秒后渐变消失）
+            setTimeout(() => {
+                if (resultDiv.style.display === 'block') {
+                    // 添加淡出动画
+                    resultDiv.classList.add('fade-out');
+                    
+                    // 等待淡出动画完成后隐藏
+                    setTimeout(() => {
+                        resultDiv.style.display = 'none';
+                        resultDiv.classList.remove('fade-out');
+                    }, 500);
+                }
+            }, 3000);
+            
+            // 调试：记录showResult调用时的状态
+            console.log(`[showResult] 消息: "${message}", 类型: ${type}, currentEditingStudentId:`, currentEditingStudentId);
+        }
+        
+        // 页面加载时检查是否已登录
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                // 可以在这里验证token是否有效
+                // 暂时直接显示批量添加页面
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('batchForm').style.display = 'block';
+                showResult('已自动登录', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

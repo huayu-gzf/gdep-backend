@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广东工程职业技术学院 - 迎新助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="coze-integration.js"></script>
+
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="progress-indicator" id="progressIndicator"></div>
+    
+    <div class="floating-element" style="top: 10%; left: 5%;"></div>
+    <div class="floating-element" style="top: 60%; right: 8%;"></div>
+    
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <h1>广东工程职业技术学院</h1>
+                <div class="subtitle">迎新智能助手</div>
+            </div>
+            <div class="header-right">
+                <ul class="nav-links"></ul>
+                
+                <div class="school-links">
+                    <a href="https://www.gdep.edu.cn/" target="_blank">
+                        <i class="fas fa-globe"></i> 学校官网
+                    </a>
+                    <a href="https://zf.gdep.edu.cn/" target="_blank">
+                        <i class="fas fa-graduation-cap"></i> 教务系统
+                    </a>
+                    <a href="javascript:void(0)" id="logoutButton" onclick="handleLogout()" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> 注销
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="manual-section fade-in-up">
+            <div class="section-header" onclick="toggleSection('section1')">
+                <span class="section-counter">一</span>
+                学校简介
+            </div>
+            <div class="section-content" id="section1">
+                <div class="manual-links">
+                    <a href="sections/school-overview.html">
+                        <i class="fas fa-university link-icon"></i>
+                        1. 整体情况
+                    </a>
+                    <a href="sections/school-badge.html">
+                        <i class="fas fa-shield-alt link-icon"></i>
+                        2. 校徽校训
+                    </a>
+                    <a href="sections/school-song.html">
+                        <i class="fas fa-music link-icon"></i>
+                        3. 校歌《筑梦同行》
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-section fade-in-up delay-1">
+            <div class="section-header" onclick="toggleSection('section2')">
+                <span class="section-counter">二</span>
+                规章制度
+            </div>
+            <div class="section-content" id="section2">
+                <div class="manual-links">
+                    <a href="sections/regulations-1.html">
+                        <i class="fas fa-file-alt link-icon"></i>
+                        1.普通高等学校学生管理规定
+                    </a>
+                    <a href="sections/regulations-2.html">
+                        <i class="fas fa-file-alt link-icon"></i>
+                        2.高等学校学生行为准则
+                    </a>
+                    <a href="sections/regulations-3.html">
+                        <i class="fas fa-file-alt link-icon"></i>
+                        3.广东工程职业技术学院学生学籍管理规定（修订）
+                    </a>
+                    <a href="sections/regulations-4.html">
+                        <i class="fas fa-file-alt link-icon"></i>
+                        4.广东工程职业技术学院全日制学生转专业管理实施办法（修订）
+                    </a>
+                    <a href="sections/regulations-5.html">
+                        <i class="fas fa-file-alt link-icon"></i>
+                        5.广东工程职业技术学院普通专科学生转学管理实施细则（修订）
+                    </a>
+                    <a href="sections/regulations-6.html">
+                        <i class="fas fa-award link-icon"></i>
+                        6.广东工程职业技术学院国家奖学金管理办法
+                    </a>
+                    <a href="sections/regulations-7.html">
+                        <i class="fas fa-award link-icon"></i>
+                        7.广东工程职业技术学院国家励志奖学金管理办法
+                    </a>
+                    <a href="sections/regulations-8.html">
+                        <i class="fas fa-hand-holding-usd link-icon"></i>
+                        8.广东工程职业技术学院国家助学金管理办法
+                    </a>
+                    <a href="sections/regulations-9.html">
+                        <i class="fas fa-file-invoice-dollar link-icon"></i>
+                        9.广东工程职业技术学院国家助学贷款管理办法
+                    </a>
+                    <a href="sections/regulations-10.html">
+                        <i class="fas fa-chart-line link-icon"></i>
+                        10.广东工程职业技术学院学生素质测评实施细则（修订稿）
+                    </a>
+                    <a href="sections/regulations-11.html">
+                        <i class="fas fa-trophy link-icon"></i>
+                        11.广东工程职业技术学院学生创先争优评选实施办法
+                    </a>
+                    <a href="sections/regulations-12.html">
+                        <i class="fas fa-calendar-check link-icon"></i>
+                        12.广东工程职业技术学院学生考勤规定
+                    </a>
+                    <a href="sections/regulations-13.html">
+                        <i class="fas fa-exclamation-triangle link-icon"></i>
+                        13.广东工程职业技术学院学生违纪处理处分规定
+                    </a>
+                    <a href="sections/regulations-14.html">
+                        <i class="fas fa-shower link-icon"></i>
+                        14.广东工程职业技术学院学生宿舍热水使用管理细则
+                    </a>
+                    <a href="sections/regulations-15.html">
+                        <i class="fas fa-clipboard-list link-icon"></i>
+                        15.广东工程职业技术学院考场纪律规定
+                    </a>
+                    <a href="sections/regulations-16.html">
+                        <i class="fas fa-ban link-icon"></i>
+                        16.广东工程职业技术学院考试违纪及舞弊处理规定
+                    </a>
+                    <a href="sections/regulations-17.html">
+                        <i class="fas fa-home link-icon"></i>
+                        17.广东工程职业技术学院学生宿舍管理制度
+                    </a>
+                    <a href="sections/regulations-18.html">
+                        <i class="fas fa-check-circle link-icon"></i>
+                        18.广东工程职业技术学院解除学生违纪处分暂行规定
+                    </a>
+                    <a href="sections/regulations-19.html">
+                        <i class="fas fa-book link-icon"></i>
+                        19.广东工程职业技术学院图书馆读者须知
+                    </a>
+                    <a href="sections/regulations-20.html">
+                        <i class="fas fa-gavel link-icon"></i>
+                        20.广东工程职业技术学院学生申诉处理办法
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-section fade-in-up delay-2">
+            <div class="section-header" onclick="toggleSection('section3')">
+                <span class="section-counter">三</span>
+                服务指南
+            </div>
+            <div class="section-content" id="section3">
+                <div class="manual-links">
+                    <a href="sections/services-1.html">
+                        <i class="fas fa-file-signature link-icon"></i>
+                        1. 国家奖学金申请流程
+                    </a>
+                    <a href="sections/services-2.html">
+                        <i class="fas fa-file-signature link-icon"></i>
+                        2. 国家励志奖学金申请流程
+                    </a>
+                    <a href="sections/services-3.html">
+                        <i class="fas fa-file-signature link-icon"></i>
+                        3. 国家助学金申请流程
+                    </a>
+                    <a href="sections/services-4.html">
+                        <i class="fas fa-file-signature link-icon"></i>
+                        4. 国家助学贷款申请流程
+                    </a>
+                    <a href="sections/services-5.html">
+                        <i class="fas fa-file-invoice-dollar link-icon"></i>
+                        5. 国家助学贷款还款流程
+                    </a>
+                    <a href="sections/services-6.html">
+                        <i class="fas fa-road link-icon"></i>
+                        6. 新生入学"绿色通道"办理流程
+                    </a>
+                    <a href="sections/services-7.html">
+                        <i class="fas fa-briefcase link-icon"></i>
+                        7. 校内勤工助学岗位申请流程
+                    </a>
+                    <a href="sections/services-8.html">
+                        <i class="fas fa-flag link-icon"></i>
+                        8. 申请入党流程
+                    </a>
+                    <a href="sections/services-9.html">
+                        <i class="fas fa-users link-icon"></i>
+                        9. 申请入团流程
+                    </a>
+                    <a href="sections/services-10.html">
+                        <i class="fas fa-sitemap link-icon"></i>
+                        10. 申请加入学生机构流程
+                    </a>
+                    <a href="sections/services-11.html">
+                        <i class="fas fa-users link-icon"></i>
+                        11. 申请成立新社团流程
+                    </a>
+                    <a href="sections/services-12.html">
+                        <i class="fas fa-calendar-minus link-icon"></i>
+                        12. 学生请假流程
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-section fade-in-up delay-3">
+            <div class="section-header" onclick="toggleSection('section4')">
+                <span class="section-counter">四</span>
+                自考本科（相沟通辅导班）教育
+            </div>
+            <div class="section-content" id="section4">
+                <div class="manual-links">
+                    <a href="sections/self-examination.html">
+                        <i class="fas fa-graduation-cap link-icon"></i>
+                        自考本科（相沟通辅导班）教育详情
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-section fade-in-up delay-4">
+            <div class="section-header" onclick="toggleSection('section5')">
+                <span class="section-counter">五</span>
+                人工智能技术应用
+            </div>
+            <div class="section-content" id="section5">
+                <div class="manual-links">
+                    <a href="sections/ai-particles.html">
+                        <i class="fas fa-hand-sparkles link-icon"></i>
+                        1. AI 手势控制 3D 粒子
+                    </a>
+                    <a href="sections/ai-pose.html">
+                        <i class="fas fa-child link-icon"></i>
+                        2. AI 全身姿态涂鸦
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div> <div class="custom-footer">
+        <div class="footer-info">
+            <p><i class="fas fa-map-marker-alt"></i> （广州校区）广州市天河区渔兴路18号</p>
+            <p><i class="fas fa-map-marker-alt"></i> （清远校区）广东清远清城区中宿路27号</p>
+            <p><i class="fas fa-phone-alt"></i> 招生电话：020-37395743  <i class="fas fa-envelope"></i> 邮编：510520</p>
+            <p class="copyright">粤ICP备06084727号  广东工程职业技术学院</p>
+        </div>
+    </div>
+
+    <script>
+        // 显示欢迎信息
+        // 显示欢迎信息 (改为弹窗 Toast 模式)
+        function showWelcomeMessage() {
+            try {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                const logoutButton = document.getElementById('logoutButton');
+                
+                if (isLoggedIn) {
+                    const userData = localStorage.getItem('loggedInUser');
+                    if (userData) {
+                        const user = JSON.parse(userData);
+                        if (user && user.name) {
+                            const roleText = user.role === 'admin' ? '管理员' : '同学';
+                            
+                            // 1. 显示注销按钮
+                            if(logoutButton) logoutButton.style.display = 'inline-flex';
+                            
+                            // 2. 检查是否已经提示过 (防止刷新页面重复弹窗，可选)
+                            // 这里我们每次刷新都弹一次，更有仪式感
+                            showLocalToast(`👋 欢迎回来，${user.name}${roleText}！`);
+                        }
+                    }
+                } else {
+                    // 未登录跳转
+                    window.location.replace('login.html');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // 本地简易 Toast 函数 (为了配合 index.html 独立运行)
+        function showLocalToast(message) {
+            // 尝试获取 coze-integration.js 创建的 toast
+            let toast = document.getElementById('custom-toast');
+            
+            // 如果还没创建，自己创建一个
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'custom-toast';
+                toast.className = 'toast-notification';
+                document.body.appendChild(toast);
+            }
+            
+            // 设置内容并显示
+            toast.innerHTML = `<span>${message}</span>`;
+            toast.classList.add('show');
+            
+            // 3秒后消失
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 处理注销功能：仅添加确认提示，不改变其他样式
+        function handleLogout() {
+            // 新增注销确认提示，避免误操作
+            if (confirm('确定要注销登录吗？')) {
+                try {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('loggedInUser');
+                    window.location.replace('login.html');
+                } catch (error) {
+                    window.location.replace('login.html');
+                }
+            }
+        }
+        
+        // 使用DOMContentLoaded确保更快执行
+        document.addEventListener('DOMContentLoaded', showWelcomeMessage);
+        
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const header = section.previousElementSibling;
+            
+            if (section.style.display === 'block') {
+                section.style.display = 'none';
+                header.classList.remove('active');
+            } else {
+                section.style.display = 'block';
+                header.classList.add('active');
+            }
+        }
+        
+        // 初始状态：默认隐藏所有部分
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // 添加滚动进度指示器
+            window.addEventListener('scroll', function() {
+                const winHeight = window.innerHeight;
+                const docHeight = document.documentElement.scrollHeight;
+                const scrollTop = window.pageYOffset;
+                const scrollPercent = scrollTop / (docHeight - winHeight);
+                const progressBar = document.getElementById('progressIndicator');
+                progressBar.style.transform = `scaleX(${scrollPercent})`;
+            });
+        });
+    </script>
+</body>
+</html>

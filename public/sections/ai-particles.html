@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 赛博粒子 - 广东工程职业技术学院</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050505; font-family: 'Segoe UI', sans-serif; }
+        #canvas-container { width: 100vw; height: 100vh; z-index: 1; }
+        
+        /* 摄像头悬浮窗 - 赛博朋克风格 */
+        #video-container {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 260px;
+            height: 195px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+            z-index: 10;
+            background: #000;
+        }
+        
+        #video-preview {
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1); /* 保留镜像翻转，确保看自己像照镜子 */
+            object-fit: cover;
+            opacity: 0.8;
+        }
+
+        /* 状态指示器 */
+        #gesture-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #00ffff;
+            font-size: 12px;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        /* 返回按钮 */
+        .back-home-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 100;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 1px;
+        }
+        .back-home-btn:hover { 
+            background: rgba(0, 255, 255, 0.2); 
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        /* 加载动画 */
+        #loading {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-size: 1.5rem;
+            z-index: 20;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0,255,255,0.5);
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            margin: 15px auto;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .loading-progress {
+            width: 100%;
+            height: 100%;
+            background: #00ffff;
+            animation: loading 2s infinite ease-in-out;
+            transform-origin: left;
+        }
+        @keyframes loading { 0% {transform: scaleX(0);} 100% {transform: scaleX(1);} }
+        
+        /* 提示文字 */
+        .tips {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-align: right;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            pointer-events: none;
+            line-height: 1.8;
+        }
+        .key { color: #00ffff; font-weight: bold; margin-right: 5px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <a href="../index.html" class="back-home-btn">
+        <i class="fas fa-reply"></i> EXIT SYSTEM
+    </a>
+
+    <div id="loading">
+        <div>INITIALIZING AI CORE...</div>
+        <div class="loading-bar"><div class="loading-progress"></div></div>
+        <div style="font-size: 12px; opacity: 0.7;">请允许摄像头权限以启动神经连接</div>
+    </div>
+
+    <div id="video-container">
+        <div id="gesture-status">等待手势信号...</div>
+        <video id="video-preview" playsinline></video>
+    </div>
+
+    <div class="tips">
+        <div><span class="key">张开/握拳</span> 控制粒子扩散</div>
+        <div><span class="key">移动手掌</span> 控制视角旋转</div>
+        <div><span class="key">食指拇指捏合</span> 切换模型形态</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+        // 引入后处理模块，实现发光效果
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // --- 全局变量 ---
+        let scene, camera, renderer, composer;
+        let particles, geometry, material;
+        const particleCount = 20000; // 增加粒子数量
+        let positions = [];
+        let colors = [];
+        let currentShape = 'galaxy';
+        let shapeKeys = []; // 存储所有形状名称的数组
+        
+        // 交互状态
+        const params = {
+            model: 'galaxy',
+            bloomStrength: 1.5,
+            bloomRadius: 0.4,
+            bloomThreshold: 0,
+            particleSize: 0.03,
+            expansion: 1.0,     // 扩散系数
+            rotationSpeed: 0.001,
+            handX: 0,           // 手势控制的X旋转目标
+            handY: 0            // 手势控制的Y旋转目标
+        };
+
+        // 平滑过渡变量
+        let targetExpansion = 1.0;
+        let isPinching = false;
+        let lastPinchTime = 0;
+
+        // --- 1. 初始化 Three.js ---
+        function initThree() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.03); // 黑色雾气增加深邃感
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 4;
+
+            renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); // 关闭自带抗锯齿，交给后处理
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 性能优化
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // 后处理 - 辉光效果 (Bloom)
+            const renderScene = new RenderPass(scene, camera);
+            const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+            bloomPass.threshold = params.bloomThreshold;
+            bloomPass.strength = params.bloomStrength;
+            bloomPass.radius = params.bloomRadius;
+
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+
+            // 创建粒子系统
+            geometry = new THREE.BufferGeometry();
+            const initialPos = new Float32Array(particleCount * 3);
+            const initialColors = new Float32Array(particleCount * 3);
+            
+            const color = new THREE.Color();
+            
+            for (let i = 0; i < particleCount; i++) {
+                initialPos[i * 3] = (Math.random() - 0.5) * 10;
+                initialPos[i * 3 + 1] = (Math.random() - 0.5) * 10;
+                initialPos[i * 3 + 2] = (Math.random() - 0.5) * 10;
+                
+                // 初始颜色 - 赛博青蓝
+                color.setHSL(0.5 + Math.random() * 0.1, 0.8, 0.6); 
+                initialColors[i * 3] = color.r;
+                initialColors[i * 3 + 1] = color.g;
+                initialColors[i * 3 + 2] = color.b;
+
+                // 存储当前位置状态
+                positions.push({x: initialPos[i*3], y: initialPos[i*3+1], z: initialPos[i*3+2]});
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(initialPos, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(initialColors, 3));
+
+            // 加载发光纹理
+            const sprite = new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/spark1.png');
+
+            material = new THREE.PointsMaterial({
+                size: params.particleSize,
+                map: sprite,
+                vertexColors: true, // 开启顶点颜色
+                transparent: true,
+                opacity: 0.8,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending // 叠加混合模式，越重叠越亮
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // 生成所有形状数据
+            generateShapes();
+            shapeKeys = Object.keys(window.shapes);
+            
+            initGUI(bloomPass);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- 2. 生成高级数学模型 ---
+        function generateShapes() {
+            window.shapes = {};
+
+            // 1. 银河 (Galaxy)
+            const galaxy = [];
+            const galaxyColors = [];
+            const c1 = new THREE.Color();
+            for (let i = 0; i < particleCount; i++) {
+                // 螺旋星系方程
+                const branchAngle = (i % 3) * ((2 * Math.PI) / 3);
+                const radius = Math.random() * 2.5;
+                const spinAngle = radius * 2.5; // 旋转力度
+                
+                const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.3;
+                const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.3;
+                const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.3;
+
+                const x = Math.cos(branchAngle + spinAngle) * radius + randomX;
+                const y = randomY * 0.5; // 扁平
+                const z = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+
+                galaxy.push({x, y, z});
+                
+                // 颜色：中心黄/白，边缘紫/蓝
+                const mixedColor = c1.setHSL(0.6 + radius * 0.1, 0.8, 0.5);
+                galaxyColors.push({r: mixedColor.r, g: mixedColor.g, b: mixedColor.b});
+            }
+            window.shapes['galaxy'] = { pos: galaxy, col: galaxyColors };
+
+            // 2. 爱心 (Heart)
+            const heart = [];
+            const heartColors = [];
+            for (let i = 0; i < particleCount; i++) {
+                let t = Math.random() * Math.PI * 2;
+                let x = 16 * Math.pow(Math.sin(t), 3);
+                let y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+                let z = (Math.random() - 0.5) * 4;
+                
+                // 内部填充
+                const scale = Math.sqrt(Math.random()) * 0.15;
+                x *= scale; y *= scale; z *= scale;
+
+                heart.push({x, y, z});
+                // 颜色：粉红到深红
+                const mixedColor = c1.setHSL(0.9 + Math.random() * 0.1, 0.9, 0.4);
+                heartColors.push({r: mixedColor.r, g: mixedColor.g, b: mixedColor.b});
+            }
+            window.shapes['heart'] = { pos: heart, col: heartColors };
+
+            // 3. DNA 双螺旋
+            const dna = [];
+            const dnaColors = [];
+            for (let i = 0; i < particleCount; i++) {
+                const t = (i / particleCount) * 10 * Math.PI; // 高度
+                const radius = 1.0;
+                let x, z;
+                
+                if (i % 2 === 0) {
+                    x = Math.cos(t) * radius;
+                    z = Math.sin(t) * radius;
+                } else {
+                    x = Math.cos(t + Math.PI) * radius; // 第二条链
+                    z = Math.sin(t + Math.PI) * radius;
+                }
+                const y = (i / particleCount) * 6 - 3; // 分布在 -3 到 3
+
+                // 添加一点噪点
+                x += (Math.random() - 0.5) * 0.1;
+                z += (Math.random() - 0.5) * 0.1;
+
+                dna.push({x, y, z});
+                // 颜色：蓝绿双色
+                const hue = i % 2 === 0 ? 0.3 : 0.6;
+                const mixedColor = c1.setHSL(hue, 0.8, 0.5);
+                dnaColors.push({r: mixedColor.r, g: mixedColor.g, b: mixedColor.b});
+            }
+            window.shapes['dna'] = { pos: dna, col: dnaColors };
+
+            // 4. 莫比乌斯环 (Mobius)
+            const mobius = [];
+            const mobiusColors = [];
+            for (let i = 0; i < particleCount; i++) {
+                const u = Math.random() * Math.PI * 2;
+                const v = (Math.random() * 2 - 1) * 0.5; // 宽度
+
+                const x = (1 + v/2 * Math.cos(u/2)) * Math.cos(u);
+                const y = (1 + v/2 * Math.cos(u/2)) * Math.sin(u);
+                const z = v/2 * Math.sin(u/2);
+                
+                // 放大一点
+                mobius.push({x: x*1.5, y: y*1.5, z: z*1.5});
+                
+                // 颜色：流光溢彩
+                const mixedColor = c1.setHSL(u / (Math.PI*2), 0.8, 0.5);
+                mobiusColors.push({r: mixedColor.r, g: mixedColor.g, b: mixedColor.b});
+            }
+            window.shapes['mobius'] = { pos: mobius, col: mobiusColors };
+        }
+
+        // --- 3. UI ---
+        function initGUI(bloomPass) {
+            const gui = new GUI({ title: 'AI 核心控制台' });
+            
+            const shapeFolder = gui.addFolder('模型控制');
+            shapeFolder.add(params, 'model', shapeKeys).name('当前形态').onChange(val => { currentShape = val; });
+            shapeFolder.add(params, 'expansion', 0.1, 3.0).name('能量扩散').listen().onChange(val => targetExpansion = val);
+            
+            const visualFolder = gui.addFolder('视觉特效');
+            visualFolder.add(params, 'bloomStrength', 0, 3).name('辉光强度').onChange(v => bloomPass.strength = v);
+            visualFolder.add(params, 'bloomRadius', 0, 1).name('光晕半径').onChange(v => bloomPass.radius = v);
+            
+            // 默认关闭，保持界面整洁
+            // gui.close();
+        }
+
+        // --- 4. 核心动画循环 ---
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 1. 粒子物理更新
+            const positionsAttribute = geometry.attributes.position;
+            const colorsAttribute = geometry.attributes.color;
+            
+            const targetData = window.shapes[currentShape].pos;
+            const targetColorData = window.shapes[currentShape].col;
+            
+            // 手势控制的平滑插值
+            params.expansion += (targetExpansion - params.expansion) * 0.1;
+            
+            // 手势旋转插值
+            particles.rotation.y += (params.handX * 2 - particles.rotation.y) * 0.05;
+            particles.rotation.x += (params.handY * 1 - particles.rotation.x) * 0.05;
+            
+            // 自动旋转
+            particles.rotation.z += 0.001;
+
+            const time = Date.now() * 0.001;
+
+            for (let i = 0; i < particleCount; i++) {
+                const target = targetData[i];
+                const current = positions[i];
+                const targetCol = targetColorData[i];
+
+                // 目标位置 + 扩散系数
+                const tx = target.x * params.expansion;
+                const ty = target.y * params.expansion;
+                const tz = target.z * params.expansion;
+
+                // 简单的粒子噪点运动 (让它看起来是活的)
+                const noiseX = Math.sin(time + i * 0.1) * 0.02 * params.expansion;
+                const noiseY = Math.cos(time + i * 0.2) * 0.02 * params.expansion;
+
+                // 位置插值 (Lerp)
+                current.x += (tx - current.x) * 0.08; // 速度系数
+                current.y += (ty - current.y) * 0.08;
+                current.z += (tz - current.z) * 0.08;
+
+                // 颜色插值
+                const r = colorsAttribute.getX(i);
+                const g = colorsAttribute.getY(i);
+                const b = colorsAttribute.getZ(i);
+                
+                colorsAttribute.setXYZ(
+                    i, 
+                    r + (targetCol.r - r) * 0.05,
+                    g + (targetCol.g - g) * 0.05,
+                    b + (targetCol.b - b) * 0.05
+                );
+
+                positionsAttribute.setXYZ(i, current.x + noiseX, current.y + noiseY, current.z);
+            }
+
+            positionsAttribute.needsUpdate = true;
+            colorsAttribute.needsUpdate = true;
+
+            // 使用 Composer 渲染而非默认 renderer
+            composer.render();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- 5. AI 手势逻辑 ---
+        const videoElement = document.getElementById('video-preview');
+        const statusElement = document.getElementById('gesture-status');
+        
+        function onResults(results) {
+            document.getElementById('loading').style.display = 'none';
+            
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // 1. 计算手掌张开程度 (控制扩散)
+                const wrist = landmarks[0];
+                const middleTip = landmarks[12];
+                const thumbTip = landmarks[4];
+                const indexTip = landmarks[8];
+                const pinkyTip = landmarks[20];
+
+                const dist = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+
+                const handSize = dist(wrist, middleTip); 
+                const openDist = dist(thumbTip, pinkyTip);
+                let ratio = openDist / handSize; 
+                let newExpansion = (ratio - 0.3) * 3 + 0.5;
+                targetExpansion = Math.max(0.5, Math.min(newExpansion, 3.5));
+
+                // 2. 映射手掌位置 (控制旋转)
+                // landmarks 坐标范围是 0-1
+                const handCenterX = landmarks[9].x; // 中指根部
+                const handCenterY = landmarks[9].y;
+                
+                // 将 0-1 映射到 -1 到 1
+                params.handX = (handCenterX - 0.5) * 3; // 左右（反转方向）
+                params.handY = (0.5 - handCenterY) * 2; // 上下
+
+                // 3. 捏合手势检测 (切换模型)
+                const pinchDist = dist(thumbTip, indexTip);
+                // 捏合阈值：相对于手掌大小的 0.1 倍
+                if (pinchDist < handSize * 0.15) {
+                    if (!isPinching && Date.now() - lastPinchTime > 1000) { // 1秒冷却
+                        isPinching = true;
+                        switchModel();
+                        lastPinchTime = Date.now();
+                        triggerPinchEffect(); // 视觉反馈
+                    }
+                } else {
+                    isPinching = false;
+                }
+
+                statusElement.innerText = `AI 已连接 | 扩散: ${targetExpansion.toFixed(1)} | 旋转追踪中`;
+                statusElement.style.color = '#00ff00';
+                
+            } else {
+                statusElement.innerText = "未检测到手势";
+                statusElement.style.color = '#ff0000';
+                // 没手的时候自动恢复
+                targetExpansion = 1.0;
+                params.handX = 0;
+                params.handY = 0;
+            }
+        }
+
+        function switchModel() {
+            const currentIndex = shapeKeys.indexOf(currentShape);
+            const nextIndex = (currentIndex + 1) % shapeKeys.length;
+            currentShape = shapeKeys[nextIndex];
+            params.model = currentShape; // 同步GUI
+            
+            // 切换时的特效：先爆炸再收缩
+            params.expansion = 4.0;
+        }
+
+        function triggerPinchEffect() {
+            statusElement.innerText = "检测到捏合指令 - 切换模型";
+            statusElement.style.color = "#ffff00";
+            statusElement.style.transform = "scale(1.2)";
+            setTimeout(() => statusElement.style.transform = "scale(1)", 200);
+        }
+
+        // 初始化 MediaPipe Hands
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(onResults);
+
+        const cameraUtils = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 320,
+            height: 240
+        });
+        
+        try {
+            cameraUtils.start();
+        } catch(e) {
+            document.getElementById('loading').innerHTML = "摄像头启动失败，请检查浏览器权限";
+        }
+
+        initThree();
+        animate();
+
+    </script>
+</body>
+</html>
