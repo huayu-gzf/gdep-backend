@@ -108,3 +108,6 @@ app.listen(PORT, () => {
   console.log(`用户列表地址: http://localhost:${PORT}/api/users`);
   console.log(`数据库连接状态: ${dbConnection ? '已连接' : '未连接'}`);
 });
+
+// 导出 app 实例，供 Vercel Serverless 使用
+module.exports = app;
