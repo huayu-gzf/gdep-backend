@@ -949,7 +949,7 @@
             }
             
             try {
-                const res = await fetch('https://gdep-backend.vercel.app/api/auth/login', {
+                const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -1029,7 +1029,7 @@
             try {
                 showResult('正在处理批量添加请求...', 'info');
                 
-                console.log('准备发送API请求到: https://gdep-backend.vercel.app/api/admin/batchCreateStudents');
+                console.log('准备发送API请求到: /api/admin/batchCreateStudents');
                 console.log('请求头信息:', {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token.substring(0, 10)}...` // 只显示token开头部分，保护安全
@@ -1037,7 +1037,7 @@
                 console.log('请求体数据:', { students });
                 
                 const fetchStartTime = Date.now();
-                const res = await fetch('https://gdep-backend.vercel.app/api/admin/batchCreateStudents', {
+                const res = await fetch('/api/admin/batchCreateStudents', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1138,7 +1138,7 @@
                 showResult('正在上传并处理Excel文件...', 'info');
                 
                 // 实际调用后端接口
-                const res = await fetch('https://gdep-backend.vercel.app/api/admin/uploadExcel', {
+                const res = await fetch('/api/admin/uploadExcel', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1208,7 +1208,7 @@
             try {
                 showResult('正在获取学生列表...', 'info');
                 
-                const res = await fetch('https://gdep-backend.vercel.app/api/admin/students', {
+                const res = await fetch('/api/admin/students', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1333,7 +1333,7 @@
             try {
                 showResult('正在批量删除学生...', 'info');
                 
-                const res = await fetch('https://gdep-backend.vercel.app/api/admin/students/batch', {
+                const res = await fetch('/api/admin/students/batch', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1463,7 +1463,7 @@
                 
                 if (currentEditingStudentId) {
                     // 编辑模式
-                    url = `https://gdep-backend.vercel.app/api/admin/students/${currentEditingStudentId}`;
+                    url = `/api/admin/students/${currentEditingStudentId}`;
                     method = 'PUT';
                     const updateData = { name, major };
                     // 如果是编辑模式且有密码，添加到请求数据中
@@ -1473,7 +1473,7 @@
                     body = JSON.stringify(updateData);
                 } else {
                     // 添加模式
-                    url = 'https://gdep-backend.vercel.app/api/admin/students';
+                    url = '/api/admin/students';
                     method = 'POST';
                     const requestData = { username, name, major };
                     // 如果是添加模式且有密码，添加到请求数据中
@@ -1532,7 +1532,7 @@
             try {
                 showResult('正在删除学生...', 'info');
                 
-                const res = await fetch(`https://gdep-backend.vercel.app/api/admin/students/${id}`, {
+                const res = await fetch(`/api/admin/students/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
