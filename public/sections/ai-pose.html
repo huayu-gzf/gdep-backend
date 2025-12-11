@@ -126,6 +126,120 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* --- 移动端专属适配代码 --- */ 
+        @media (max-width: 768px) { 
+            
+            /* 1. 控制面板：改为底部横向工具栏 */ 
+            .controls { 
+                top: auto;           /* 取消顶部定位 */ 
+                bottom: 30px;        /* 固定在屏幕底部 */ 
+                right: auto;         /* 取消靠右 */ 
+                left: 50%;           /* 水平居中起点 */ 
+                transform: translateX(-50%); /* 真正的水平居中修正 */ 
+                
+                width: 90%;          /* 宽度占屏幕宽度的90% */ 
+                flex-direction: row; /* 关键：改为横向排列 */ 
+                justify-content: space-between; /* 按钮之间留空 */ 
+                padding: 10px; 
+                gap: 8px;            /* 按钮间距变小 */ 
+            } 
+
+            /* 2. 按钮样式微调：让三个按钮能塞得进一行 */ 
+            .char-btn { 
+                flex: 1;             /* 三个按钮平分宽度 */ 
+                padding: 8px 5px;    /* 减小内边距 */ 
+                font-size: 12px;     /* 字体改小 */ 
+                white-space: nowrap; /* 防止文字换行 */ 
+                justify-content: center; 
+            } 
+            
+            /* 图标和文字的间距也改小一点 */ 
+            .char-btn i { 
+                margin-right: 2px; 
+                width: auto; 
+            } 
+
+            /* 3. 摄像头预览窗：移到右上角并缩小 */ 
+            #video-container { 
+                bottom: auto;    /* 取消底部定位 */ 
+                left: auto;      /* 取消左侧定位 */ 
+                
+                top: 70px;       /* 放在顶部（避开返回按钮） */ 
+                right: 20px;     /* 靠右 */ 
+                
+                width: 100px;    /* 缩小宽度 */ 
+                height: 75px;    /* 缩小高度 */ 
+                border-width: 1px; /* 边框变细 */ 
+            } 
+            
+            /* 4. 返回按钮：稍微缩小一点 */ 
+            .back-home-btn { 
+                padding: 8px 16px; 
+                font-size: 12px; 
+                top: 20px; 
+                left: 20px; 
+            } 
+        }
+        /* --- UI 切换按钮样式 --- */ 
+        #ui-toggle-btn { 
+            position: absolute; 
+            top: 30px; 
+            right: 30px; /* 放在右上角 */ 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            color: white; 
+            font-size: 18px; 
+            cursor: pointer; 
+            z-index: 200; /* 保证层级最高，永远能点到 */ 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        } 
+
+        #ui-toggle-btn:active { 
+            transform: scale(0.9); 
+            background: rgba(255, 255, 255, 0.3); 
+        } 
+
+        /* --- 定义“隐藏状态”下的样式 --- */ 
+
+        /* 1. 当 body 有 .ui-hidden 类时，控制面板往下沉 */ 
+        body.ui-hidden .controls { 
+            transform: translateX(-50%) translateY(150%); /* 往下移动 150% 隐藏 */ 
+            opacity: 0; 
+        } 
+
+        /* 2. 当 body 有 .ui-hidden 类时，摄像头预览渐渐消失 */ 
+        body.ui-hidden #video-container { 
+            opacity: 0; 
+            pointer-events: none; /* 隐藏后不挡点击 */ 
+            transform: translateY(-20px); /* 稍微往上飘一点 */ 
+        } 
+
+        /* 3. 这里的 transition 必须加在原元素上，才能有动画效果 */ 
+        .controls, #video-container { 
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+        } 
+
+        /* 移动端适配调整按钮位置 */ 
+        @media (max-width: 768px) { 
+            #ui-toggle-btn { 
+                top: 20px; 
+                right: 20px; 
+                width: 40px; 
+                height: 40px; 
+            } 
+            
+            /* 配合之前的移动端样式，确保控制面板隐藏时不仅往下，还要保持居中 */ 
+            body.ui-hidden .controls { 
+                transform: translateX(-50%) translateY(200%); /* 移动端多藏深一点 */ 
+            } 
+        }    
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -144,8 +258,12 @@
         <div>正在加载 AI 姿态模型...<br>请允许摄像头权限并站在摄像头前</div>
     </div>
 
+    <button id="ui-toggle-btn" onclick="toggleUI()">
+        <i class="fas fa-eye"></i>
+    </button>
+
     <div id="video-container">
-        <video id="input_video"></video>
+        <video id="input_video" playsinline webkit-playsinline></video>
     </div>
 
     <div class="controls">
@@ -189,6 +307,29 @@
             document.querySelectorAll('.char-btn').forEach(btn => btn.classList.remove('active'));
             event.currentTarget.classList.add('active');
         }
+
+        // UI 显隐切换逻辑 
+        let isUIVisible = true;
+
+        window.toggleUI = function() {
+            isUIVisible = !isUIVisible;
+            const btnIcon = document.querySelector('#ui-toggle-btn i');
+            
+            if (isUIVisible) {
+                // 显示界面
+                document.body.classList.remove('ui-hidden');
+                btnIcon.className = 'fas fa-eye'; // 图标变成眼睛
+            } else {
+                // 隐藏界面 (开启沉浸模式)
+                document.body.classList.add('ui-hidden');
+                btnIcon.className = 'fas fa-camera'; // 图标变成相机(暗示点击可看相机)
+            }
+        }
+
+        // 可选：页面加载后 3 秒自动进入沉浸模式，展示全屏效果
+        setTimeout(() => {
+            // toggleUI(); // 如果你想默认隐藏，就把这行注释解开
+        }, 3000);
 
         // --- 核心绘制逻辑 ---
         
@@ -366,13 +507,17 @@
             canvasCtx.restore();
         }
 
+        // 1. 在这里加一行判断手机的代码（如果在这个 script 标签里之前没写过的话）
+        const isMobile = window.innerWidth < 768;
+
         // 初始化 MediaPipe Pose
         const pose = new Pose({locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
         }});
 
         pose.setOptions({
-            modelComplexity: 1,
+            // 【核心修改】手机用0(Lite版)，电脑用1(标准版)。这能极大缩短加载时间！
+            modelComplexity: isMobile ? 0 : 1,
             smoothLandmarks: true,
             enableSegmentation: false,
             minDetectionConfidence: 0.5,
@@ -386,8 +531,9 @@
             onFrame: async () => {
                 await pose.send({image: videoElement});
             },
-            width: 640,
-            height: 480
+            // 移动端强烈建议降低分辨率，否则会卡顿
+            width: window.innerWidth < 600 ? 480 : 640,
+            height: window.innerWidth < 600 ? 360 : 480
         });
         camera.start();
 
