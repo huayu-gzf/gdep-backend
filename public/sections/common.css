@@ -1,82 +1,56 @@
 :root {
-    /* ================= 核心变量定义 ================= */
+    /* --- 1. 颜色变量 (已更新为首页同款) --- */ 
+    --primary: #2563eb;       /* 科技蓝 */ 
+    --primary-dark: #1e40af;
+    --primary-light: #eff6ff;
     
-    /* 1. 布局尺寸 */
+    /* --- 2. 背景与文字 --- */ 
+    --bg-page: #f3f4f6;       /* 浅灰底 */ 
+    --bg-card: #ffffff;
+    --text-main: #1f2937;
+    --border: #e5e7eb;
+    
+    /* --- 3. 布局变量 --- */ 
     --sidebar-width: 260px;
-    --header-height: auto;
+    --header-height: 60px;
     
-    /* 2. 主色调 - 现代蓝色系 */
-    --primary: #0070f3;
-    --primary-dark: #0051aa;
-    --primary-light: #e6f0ff;
-    --primary-accent: #40a9ff;
-    --primary-glow: rgba(0, 112, 243, 0.15);
-    
-    /* 3. 辅助功能色 */
-    --secondary: #36cfc9;
-    --success: #52c41a;
-    --warning: #faad14;
-    --danger: #ff4d4f;
-    --info: #1890ff;
-    
-    /* 4. 中性色系 */
-    --dark: #1d2129;
-    --gray-dark: #4e5969;
-    --gray: #86909c;
-    --gray-light: #c9cdD4;
-    --light: #f2f3f5;
-    --white: #ffffff;
-    --background: #f7f9fc;
-    
-    /* 5. 文字颜色 */
-    --text-primary: #1d2129;
-    --text-secondary: #4e5969;
-    --text-muted: #86909c;
-    
-    /* 6. 边框与阴影 (优化质感) */
-    --border-light: #e5e6eb;
-    --border: #dcdfe6;
-    --border-radius: 8px;
-    --border-radius-lg: 12px;
-    
-    /* 更柔和的现代阴影 */
+    /* 额外保留的变量 */
+    --primary-accent: #f59e0b; /* 警示橙 */ 
+    --text-sub: #6b7280;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    
-    /* 7. 字体与动效 */
-    --font-primary: 'Inter', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
-    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* 新增：导航栏背景变量 */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --nav-bg: rgba(255, 255, 255, 0.95);
+    --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* ========================================= 
-    暗黑模式变量覆盖 (终极修复版) 
+    暗黑模式变量覆盖 (与 index.css 一致) 
     ========================================= */ 
  [data-theme="dark"] { 
-     /* 1. 核心变量反转 */ 
-     --primary: #3291ff; 
-     --primary-dark: #0070f3; 
-     --primary-light: #112a45; 
-     --primary-glow: rgba(50, 145, 255, 0.2); 
- 
-     /* 加 !important 确保覆盖所有默认白色 */ 
-     --white: #161b22 !important; 
-     --background: #0d1117 !important; 
-     --light: #21262d !important; 
+     /* 主色调 - 调整为更亮的蓝色 */ 
+     --primary: #3b82f6; 
+     --primary-dark: #60a5fa; 
+     --primary-light: #1e293b; 
      
-     /* 导航栏专用深色背景 */ 
-     --nav-bg: #161b22 !important; 
+     /* 中性色系列 */ 
+     --bg-page: #0f172a; 
+     --bg-card: #1e293b; 
+     --text-main: #f1f5f9; 
+     --text-sub: #94a3b8; 
+     --border: #334155; 
      
-     --text-primary: #f0f6fc !important; 
-     --text-secondary: #c9d1d9 !important; 
-     --text-muted: #8b949e !important; 
+     /* 导航栏深色背景 */ 
+     --nav-bg: rgba(30, 41, 59, 0.95); 
      
-     --border-light: #30363d !important; 
-     --border: #30363d !important; 
-     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.9) !important; 
+     /* 其他关键变量 */ 
+     --white: #1e293b; 
+     --background: #0f172a; 
+     --light: #334155; 
+     --text-primary: #f1f5f9; 
+     --text-secondary: #cbd5e1; 
+     --text-muted: #94a3b8; 
+     --border-light: #475569; 
+     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3); 
  } 
  
  /* ------------------------------------------------ 
@@ -85,13 +59,38 @@
  
  /* 1. 修复导航栏和全局背景 */ 
  /* 这里的关键是让 nav 和 body 保持一致的背景，防止视觉闪烁 */ 
- [data-theme="dark"] nav { 
-     background-color: var(--nav-bg) !important; 
-     border-bottom-color: var(--border) !important; 
+ [data-theme="dark"] body { 
+     background-color: var(--bg-page); 
+     background-image: none; /* 去掉点状纹理 */ 
  } 
  
- [data-theme="dark"] body { 
-     background-image: none !important; /* 去掉点状纹理，纯黑更护眼 */ 
+ [data-theme="dark"] header { 
+     background: var(--bg-card); 
+     border-bottom-color: var(--border); 
+ } 
+ 
+ [data-theme="dark"] nav { 
+     background-color: var(--nav-bg); 
+     border-bottom-color: var(--border); 
+ } 
+ 
+ /* 2. 修复侧边栏和主内容区 */ 
+ [data-theme="dark"] .sidebar, 
+ [data-theme="dark"] .main-content { 
+     background: var(--bg-card); 
+     border-color: var(--border); 
+ } 
+ 
+ /* 3. 修复表格元素 */ 
+ [data-theme="dark"] table th { 
+     background-color: #0f172a; 
+     color: var(--text-main); 
+ } 
+ 
+ [data-theme="dark"] table td { 
+     background-color: var(--bg-card); 
+     color: var(--text-main); 
+     border-color: var(--border); 
  } 
  
  /* 2. 修复 AI 助手 (去除白色渐变) */ 
@@ -150,14 +149,12 @@ html {
 body {
     font-family: var(--font-primary);
     line-height: 1.6;
-    color: var(--text-primary);
-    background-color: var(--background);
-    /* 细微的网格背景纹理 */
-    background-image: 
-        radial-gradient(rgba(0, 112, 243, 0.03) 1px, transparent 1px),
-        radial-gradient(rgba(0, 112, 243, 0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-    background-position: 0 0, 20px 20px;
+    color: var(--text-main);
+    
+    /* 新增：首页同款背景纹理 */
+    background-color: var(--bg-page);
+    background-image: radial-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
     
     /* 核心布局：Flex列模式，禁止整页滚动 */
     display: flex;
@@ -199,29 +196,34 @@ header, nav, footer {
 }
 
 header {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: var(--white);
-    padding: 16px 0;
+    /* 1. 改回蓝色渐变背景，解决页面"惨白"问题 */
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    
+    /* 2. 文字改为白色，确保对比度 */
+    color: white;
+    
+    padding: 15px 0;
     text-align: center;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
     z-index: 100;
 }
 
 header h1 {
-    font-size: clamp(1.25rem, 4vw, 2rem); /* 优化响应式字号 */
+    font-size: 1.5rem;
+    margin: 0;
     font-weight: 700;
-    letter-spacing: 0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15); /* 增加文字阴影，更有质感 */
 }
 
 nav {
-    /* 修改这里：使用变量 */
     background-color: var(--nav-bg);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border-light);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
-    z-index: 99;
-    /* 已删除过渡动画，避免主题切换时出现白色残影 */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .nav-container {
@@ -326,25 +328,29 @@ nav {
 
 .sidebar a {
     display: block;
-    padding: 10px 14px;
-    color: var(--text-secondary);
+    padding: 12px 15px; /* 稍微加大一点点击区域 */
+    color: var(--text-main); /* 🔥 改用主文字颜色，更清晰 */
     text-decoration: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius); /* 保持圆角 */
     transition: all 0.2s;
     font-size: 14px;
+    border-left: 3px solid transparent; /* 预留左侧边框位置，防止抖动 */
 }
 
+/* 悬浮状态：淡淡的灰色/蓝色背景 */
 .sidebar a:hover {
-    background-color: var(--primary-light);
-    color: var(--primary);
-    transform: translateX(4px); /* 悬浮微动效 */
+    background-color: rgba(0, 0, 0, 0.03); /* 极淡的灰色 */
+    color: var(--primary); /* 文字变蓝 */
+    padding-left: 18px; /* 文字轻轻右移一点点，增加交互感 */
 }
 
+/* 选中状态：淡蓝色背景 + 蓝色文字 + 左侧粗边框 */
 .sidebar a.active {
-    background-color: var(--primary);
-    color: var(--white);
-    font-weight: 500;
-    box-shadow: 0 4px 10px rgba(0, 112, 243, 0.3);
+    background-color: rgba(37, 99, 235, 0.08); /* 🔥 核心：透明度只有 8% 的蓝色背景 */
+    color: var(--primary); /* 文字深蓝 */
+    font-weight: 600;
+    border-left: 3px solid var(--primary); /* 左侧加一条竖线强调 */
+    box-shadow: none; /* 去掉之前的阴影，更扁平化 */
 }
 
 /* 右侧主内容区 */
@@ -498,6 +504,10 @@ tr:hover { background-color: var(--background); }
         bottom: 0;
         width: 280px; /* 移动端固定宽 */
         z-index: 1001;
+        
+        /* 🔥 新增这一行：强制给侧边栏加背景色 */
+        background-color: var(--bg-card);
+        
         transform: translateX(-100%);
         border-radius: 0;
         border: none;
@@ -542,6 +552,32 @@ tr:hover { background-color: var(--background); }
         cursor: pointer;
         /* 添加过渡动画，让它能平滑消失 */
         transition: opacity 0.3s ease, transform 0.2s;
+    }
+    
+    /* --- 1. 修复菜单按钮样式 --- */
+    .menu-toggle {
+        display: flex; /* 确保显示 */
+        /* 强制白色图标，配合蓝色 Header */
+        color: white !important;
+        background: rgba(255, 255, 255, 0.2); /* 加一个半透明底，防止背景太花看不清 */
+        backdrop-filter: blur(4px);
+        border-radius: 8px;
+        /* 确保固定在左上角 */
+        top: 10px;
+        left: 10px;
+    }
+
+    /* --- 2. 修复标题与按钮重叠 --- */
+    header {
+        /* 给 Header 增加左右内边距，给按钮留出空间 */
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+    
+    header h1 {
+        /* 减小字号，防止换行 */
+        font-size: 1.2rem;
+        line-height: 1.4;
     }
 
     /* 【关键】当 body 有 sidebar-open 类时，隐藏这个按钮 */
@@ -865,6 +901,70 @@ footer {
         margin-left: 5px;
         padding: 6px;
     }
+    
+    /* ============================
+       6.1 移动端内容深度优化 (新增)
+       ============================ */
+
+    /* --- 图片优化：防止过大、霸屏 --- */
+    .responsive-img {
+        /* 限制最大高度，防止竖图占满一整屏 */
+        max-height: 250px;
+        
+        /* 宽度自适应，但不要强行拉伸模糊 */
+        width: auto;
+        max-width: 100%;
+        
+        /* 居中显示 */
+        display: block;
+        margin: 15px auto;
+        
+        /* 减小阴影，显得轻量 */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 特殊处理：校徽等需要更小一点的图片 */
+    .badge-container img {
+        max-height: 180px;
+    }
+
+    /* --- 字体优化：层级分明，阅读舒适 --- */
+    
+    /* 页面主标题 (H2) */
+    .section-content h2 {
+        font-size: 1.4rem; /* 原来可能是 1.8rem，调小 */
+        margin-bottom: 15px;
+        padding-bottom: 8px; /* 减小下划线间距 */
+    }
+
+    /* 小标题 (H3) */
+    .section-content h3 {
+        font-size: 1.1rem; /* 调小 */
+        margin: 20px 0 10px; /* 减小间距 */
+        font-weight: 600;
+    }
+
+    /* 正文段落 (P) & 列表 (LI) */
+    .section-content p,
+    .section-content li {
+        font-size: 0.95rem; /* 稍微调小，一屏能显示更多内容 */
+        line-height: 1.6;   /* 保持行间距，不拥挤 */
+        text-align: left;   /* 手机端取消两端对齐(justify)，避免字间距忽大忽小 */
+        margin-bottom: 12px;
+    }
+
+    /* 表格内的文字也调小 */
+    th, td {
+        padding: 8px 10px; /* 减小内边距 */
+        font-size: 0.85rem;
+    }
+    
+    /* 优化信息框 (Info Box) */
+    .info-box {
+        padding: 15px;
+        font-size: 0.9rem;
+        margin: 15px 0;
+    }
 }
 
 /* =========================================
@@ -879,6 +979,17 @@ footer {
 /* 2. Firefox 暗黑滚动条 */
 [data-theme="dark"] * {
     scrollbar-color: #4e5969 #161b22; /* 滑块颜色 轨道颜色 */
+}
+
+/* 3. 侧边栏暗黑模式适配 */
+[data-theme="dark"] .sidebar a.active {
+    background-color: rgba(59, 130, 246, 0.15); /* 夜间模式稍微亮一点点的透明度 */
+    color: #60a5fa; /* 亮蓝色文字 */
+    border-left-color: #60a5fa;
+}
+
+[data-theme="dark"] .sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.05); /* 夜间悬浮用淡淡的白 */
 }
 
 /* 3. Chrome/Edge/Safari 暗黑滚动条 */

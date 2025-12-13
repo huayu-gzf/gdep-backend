@@ -99,9 +99,9 @@ function initializeCoze() {
             },
             auth: {
                 type: 'token',
-                token: 'pat_dNGvzsrIVOYMdpbsSOSdbAQrcN8cTYJLskpfaBHEOzVgqAzRfLnyGDsUc8UDszgI',
+                token: 'pat_wCBasat4DEuIXnEH7pKUfSOpJZVyQB954nqfeG7Z8R0NfiZFZbkOYeKqts2JsNYm',
                 onRefreshToken: function() {
-                    return 'pat_dNGvzsrIVOYMdpbsSOSdbAQrcN8cTYJLskpfaBHEOzVgqAzRfLnyGDsUc8UDszgI'
+                    return 'pat_wCBasat4DEuIXnEH7pKUfSOpJZVyQB954nqfeG7Z8R0NfiZFZbkOYeKqts2JsNYm'
                 }
             }
         });
